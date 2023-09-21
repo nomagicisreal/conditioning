@@ -1,20 +1,8 @@
-part of data;
+part of app;
 
-enum ModelType {
-  // user,
 
-  /// see [Human]
-  person,
-  people,
-  org,
+sealed class Model extends Data {
+  const Model();
 
-  /// see [Script]
-  scriptAbility,
-  scriptConscious,
-  scriptFeeling,
-
-  /// see [Event]
-  eventAbility,
-  eventConscious,
-  eventFeeling,
+  static const List<String> typeList = [];
 }

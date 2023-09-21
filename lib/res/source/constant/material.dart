@@ -4,39 +4,24 @@ part of source;
 
 ///
 /// this file contains:
-/// [kPlaceHolder]
-///
 /// [VColor], [KColor], [KColorHex], [KColorStyle1]
+/// [KColoredBox]
+///
 /// [VThemeData]
 ///
-/// [FCanvasSizeToPaint], [VPaintFill], [VPaintFillBlur], [VPaintStroke], [KMaskFilter]
+/// [KBoxBorder], [KOutlinedBorderRounded], ...
+/// [KBorderSideBlack], [FBorderSide]
+/// [FBoxShadow], [FBoxShadowGrey], [FBoxShadowBlack]
+/// [FDecorationBox], [FDecorationShape], [FDecorationInput] ...
 ///
-/// [KDivider], [KBorderSide], [KBorder], [KBorderWithRadius],
-/// [KSizedBox], [VContainer], [VContainerStyled]
-///
-/// [_VBoxShadowBlack], [_KBoxShadowNormal], [_KBoxShadowOuter], [_KBoxShadowInner], [_KBoxShadowSolid]
-/// [VBoxDecorationBorder], [VBoxDecorationStyled]
-/// [KShapeDecoration]
-/// [KBoxDecoration], [KBoxDecorationStyled]
-/// [KBoxDecorationShadow1], [KBoxDecorationShadow1Border], [KBoxDecorationShadow2]
-///
-/// [KGridPaper]
+/// [KSpacer]
 /// [KProgressIndicator]
-/// [KIcon]
 /// [KDrawer]
-///
-/// [KLaTexString], [KLatexStringEquation], [KLatexStringMatrix1N], [KLatexStringMatrix2N], [FLaTexString]
 /// [KTextStyle]
-/// [KInputBorder], [KInputDecoration]
-/// [KLinearGradiant], [KLinearGradiantStyled]
+/// [VListView]
+/// [KIconMaterial]
 ///
 ///
-///
-
-const Placeholder kPlaceHolder = Placeholder();
-
-///
-/// [Color]
 ///
 
 extension VColor on Color {
@@ -44,17 +29,16 @@ extension VColor on Color {
 
   static Color get blackO_20 => Colors.black.withOpacity(0.20);
 
-  static Color get random => Color(0xFF000000 + Random().nextInt(0xFFFFFFFF));
+  static Color get random =>
+      Color(0xFF000000 + math.Random().nextInt(0xFFFFFFFF));
 
   static Color get randomWithAlpha =>
-      Color(0xFF000000 + Random().nextInt(0x00FFFFFF));
+      Color(0xFF000000 + math.Random().nextInt(0x00FFFFFF));
 }
 
 extension KColor on Color {
   static const constant_200 = Color.fromARGB(255, 200, 200, 200);
   static const rice = Color.fromARGB(255, 240, 232, 200);
-
-  static const blackO_06 = Color.fromRGBO(0, 0, 0, 0.6);
 }
 
 extension KColorHex on Color {
@@ -78,75 +62,70 @@ extension KColorHex on Color {
 
 extension KColorStyle1 on Color {
   /// R
-  static const redB1 = Color(0xFFffe0e0);
-  static const redB2 = Color(0xFFffcdcd);
-  static const redB3 = Color(0xFFf09999);
-  static const redPrimary = Color(0xFFdd5555);
-  static const redD3 = Color(0xFF991515);
-  static const redD2 = Color(0xFF771010);
-  static const redD1 = Color(0xFF440000);
+  static const redB1 = Color(0xFFffdddd);
+  static const redB2 = Color(0xFFeecccc);
+  static const redB3 = Color(0xFFdd9999);
+  static const redPrimary = Color(0xFFdd7777);
+  static const redD3 = Color(0xFFbb4444);
+  static const redD2 = Color(0xFFaa1111);
+  static const redD1 = Color(0xFF880000);
 
   /// G
-  static const greenB1 = Color(0xFFe0ffe0);
-  static const greenB2 = Color(0xFFcdffcd);
-  static const greenB3 = Color(0xFF99f099);
-  static const greenPrimary = Color(0xFF22dd22);
-  static const greenD3 = Color(0xFF2c772c);
-  static const greenD2 = Color(0xFF1d661d);
-  static const greenD1 = Color(0xFF004400);
+  static const greenB1 = Color(0xFFddffdd);
+  static const greenB2 = Color(0xFFcceecc);
+  static const greenB3 = Color(0xFFaaddaa);
+  static const greenPrimary = Color(0xFF88aa88);
+  static const greenD3 = Color(0xFF559955);
+  static const greenD2 = Color(0xFF227722);
+  static const greenD1 = Color(0xFF005500);
 
   /// B
-  static const blueB1 = Color(0xFFe0e0ff);
-  static const blueB2 = Color(0xFFcdcdff);
-  static const blueB3 = Color(0xFFaeaef0);
-  static const bluePrimary = Color(0xFF5656dd);
-  static const blueD3 = Color(0xFF2c2caa);
-  static const blueD2 = Color(0xFF1d1d99);
-  static const blueD1 = Color(0xFF0e0e66);
+  static const blueB1 = Color(0xFFddddff);
+  static const blueB2 = Color(0xFFbbbbee);
+  static const blueB3 = Color(0xFF8888dd);
+  static const bluePrimary = Color(0xFF6666cc);
+  static const blueD3 = Color(0xFF4444bb);
+  static const blueD2 = Color(0xFF222288);
+  static const blueD1 = Color(0xFF111155);
 
   /// oranges that G over B oranges
-  static const orangeB1 = Color(0xFFffeeaa);
-  static const orangeB2 = Color(0xFFffcc99);
-  static const orangeB3 = Color(0xFFffaa77);
-  static const orangePrimary = Color(0xFFdd6644);
-  static const orangeD3 = Color(0xFF885511);
-  static const orangeD2 = Color(0xFF663300);
+  static const orangeB1 = Color(0xFFffeecc);
+  static const orangeB2 = Color(0xFFffccaa);
+  static const orangeB3 = Color(0xFFeeaa88);
+  static const orangePrimary = Color(0xFFcc8866);
+  static const orangeD3 = Color(0xFFaa5533);
+  static const orangeD2 = Color(0xFF773322);
   static const orangeD1 = Color(0xFF551100);
 
   /// yellows that R over G
-  static const yellowB1 = Color(0xFFffffee);
-  static const yellowB1_1 = Color(0xFFffeeee);
-  static const yellowB2 = Color(0xFFffeeaa);
-  static const yellowB3 = Color(0xFFffee11);
-  static const yellowPrimary = Color(0xFFddcc88);
-  static const yellowD3 = Color(0xFFaa9944);
-  static const yellowD2 = Color(0xFF998844);
-  static const yellowD1 = Color(0xFF776633);
+  static const yellowB1 = Color(0xFFffffbb);
+  static const yellowB1_1 = Color(0xFFeeeeaa);
+  static const yellowB2 = Color(0xFFeedd99);
+  static const yellowB3 = Color(0xFFddcc66);
+  static const yellowPrimary = Color(0xffccbb22);
+  static const yellowD3 = Color(0xFFccbb33);
+  static const yellowD2 = Color(0xFFbbaa22);
+  static const yellowD1 = Color(0xFF998811);
 
   /// purples that B over R
-  static const purpleB1 = Color(0xFFececff);
-  static const purpleB2 = Color(0xFFdcdcff);
-  static const purpleB3 = Color(0xFFbcbcff);
-  static const purpleB4 = Color(0xFFa1a7ee);
-  static const purplePrimary = Color(0xFF8833dd);
-  static const purpleD3 = Color(0xFFaa44cc);
-  static const purpleD2 = Color(0xFF8822bb);
-  static const purpleD1 = Color(0xFF882299);
+  static const purpleB1 = Color(0xFFeeccff);
+  static const purpleB2 = Color(0xFFddbbee);
+  static const purpleB3 = Color(0xFFaa88dd);
+  static const purpleB4 = Color(0xFF9977cc);
+  static const purplePrimary = Color(0xff8866cc);
+  static const purpleD3 = Color(0xFF8844bb);
+  static const purpleD2 = Color(0xFF6622aa);
+  static const purpleD1 = Color(0xFF440099);
 }
 
-extension KColorStyle1LinearGradiant on LinearGradient {
-  static const LinearGradient of1 = LinearGradient(colors: [
-    Colors.white,
-    KColorStyle1.redPrimary,
-    KColorStyle1.orangeB3,
-    KColorStyle1.greenD1,
-    KColorStyle1.greenD3,
-  ]);
-
-  static const LinearGradient of2 = LinearGradient(colors: [
-    KColorStyle1.blueD3,
-    KColorStyle1.purpleD1,
-  ]);
+extension KColoredBox on ColoredBox {
+  static const ColoredBox red = ColoredBox(color: Colors.red);
+  static const ColoredBox orange = ColoredBox(color: Colors.orange);
+  static const ColoredBox yellow = ColoredBox(color: Colors.yellow);
+  static const ColoredBox green = ColoredBox(color: Colors.green);
+  static const ColoredBox blue = ColoredBox(color: Colors.blue);
+  static const ColoredBox blueAccent = ColoredBox(color: Colors.blueAccent);
+  static const ColoredBox purple = ColoredBox(color: Colors.purple);
 }
 
 ///
@@ -198,1034 +177,570 @@ extension VThemeData on ThemeData {
 }
 
 ///
-/// [Paint]
 ///
-
-extension FCanvasSizeToPaint on CanvasSizeToPaint {
-  static CanvasSizeToPaint of(Paint paint) => (_, __) => paint;
-}
-
-extension VPaintFill on Paint {
-  static Paint get _fill => Paint()..style = PaintingStyle.fill;
-
-  static Paint get black => _fill..color = Colors.black;
-
-  static Paint get white => _fill..color = Colors.white;
-
-  static Paint get red => _fill..color = Colors.red;
-
-  static Paint get orange => _fill..color = Colors.orange;
-
-  static Paint get yellow => _fill..color = Colors.yellow;
-
-  static Paint get green => _fill..color = Colors.green;
-
-  static Paint get blue => _fill..color = Colors.blue;
-
-  static Paint get blueAccent => _fill..color = Colors.blueAccent;
-
-  static Paint get purple => _fill..color = Colors.purple;
-}
-
-extension VPaintFillBlur on Paint {
-  static Paint get white_normal_05 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_05;
-
-  static Paint get white_normal_1 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_1;
-
-  static Paint get white_normal_2 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_2;
-
-  static Paint get white_normal_3 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_3;
-
-  static Paint get white_normal_4 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_4;
-
-  static Paint get white_normal_5 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_5;
-
-  static Paint get white_normal_6 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_6;
-
-  static Paint get white_normal_7 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_7;
-
-  static Paint get white_normal_8 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_8;
-
-  static Paint get white_normal_9 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_9;
-
-  static Paint get white_normal_10 =>
-      VPaintFill.white..maskFilter = KMaskFilter.normal_10;
-}
-
-extension VPaintStroke on Paint {
-  static Paint get _stroke => Paint()..style = PaintingStyle.stroke;
-
-  /// stroke
-
-  static Paint get _stroke_1 => _stroke..strokeWidth = 1;
-
-  static Paint get _stroke_2 => _stroke..strokeWidth = 2;
-
-  static Paint get _stroke_3 => _stroke..strokeWidth = 3;
-
-  static Paint get _stroke_4 => _stroke..strokeWidth = 4;
-
-  static Paint get _stroke_5 => _stroke..strokeWidth = 5;
-
-  /// cap
-
-  static Paint get _stroke_1_capRound => _stroke_1..strokeCap = StrokeCap.round;
-
-  static Paint get _stroke_1_capSquare =>
-      _stroke_1..strokeCap = StrokeCap.square;
-
-  static Paint get _stroke_1_capButt => _stroke_1..strokeCap = StrokeCap.butt;
-
-  static Paint get _stroke_2_capRound => _stroke_2..strokeCap = StrokeCap.round;
-
-  static Paint get _stroke_2_capSquare =>
-      _stroke_2..strokeCap = StrokeCap.square;
-
-  static Paint get _stroke_2_capButt => _stroke_2..strokeCap = StrokeCap.butt;
-
-  static Paint get _stroke_3_capRound => _stroke_3..strokeCap = StrokeCap.round;
-
-  static Paint get _stroke_3_capSquare =>
-      _stroke_3..strokeCap = StrokeCap.square;
-
-  static Paint get _stroke_3_capButt => _stroke_3..strokeCap = StrokeCap.butt;
-
-  static Paint get _stroke_4_capRound => _stroke_4..strokeCap = StrokeCap.round;
-
-  static Paint get _stroke_4_capSquare =>
-      _stroke_4..strokeCap = StrokeCap.square;
-
-  static Paint get _stroke_4_capButt => _stroke_4..strokeCap = StrokeCap.butt;
-
-  static Paint get _stroke_5_capRound => _stroke_5..strokeCap = StrokeCap.round;
-
-  static Paint get _stroke_5_capSquare =>
-      _stroke_5..strokeCap = StrokeCap.square;
-
-  static Paint get _stroke_5_capButt => _stroke_5..strokeCap = StrokeCap.butt;
-
-  /// color_strokeWidth_cap
-
-  // 1
-  static Paint get black_1_capRound => _stroke_1_capRound..color = Colors.black;
-
-  static Paint get black_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.black;
-
-  static Paint get black_1_capButt => _stroke_1_capButt..color = Colors.black;
-
-  static Paint get white_1_capRound => _stroke_1_capRound..color = Colors.white;
-
-  static Paint get white_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.white;
-
-  static Paint get white_1_capButt => _stroke_1_capButt..color = Colors.white;
-
-  static Paint get red_1_capRound => _stroke_1_capRound..color = Colors.red;
-
-  static Paint get red_1_capSquare => _stroke_1_capSquare..color = Colors.red;
-
-  static Paint get red_1_capButt => _stroke_1_capButt..color = Colors.red;
-
-  static Paint get orange_1_capRound =>
-      _stroke_1_capRound..color = Colors.orange;
-
-  static Paint get orange_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.orange;
-
-  static Paint get orange_1_capButt => _stroke_1_capButt..color = Colors.orange;
-
-  static Paint get yellow_1_capRound =>
-      _stroke_1_capRound..color = Colors.yellow;
-
-  static Paint get yellow_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.yellow;
-
-  static Paint get yellow_1_capButt => _stroke_1_capButt..color = Colors.yellow;
-
-  static Paint get green_1_capRound => _stroke_1_capRound..color = Colors.green;
-
-  static Paint get green_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.green;
-
-  static Paint get green_1_capButt => _stroke_1_capButt..color = Colors.green;
-
-  static Paint get blue_1_capRound => _stroke_1_capRound..color = Colors.blue;
-
-  static Paint get blue_1_capSquare => _stroke_1_capSquare..color = Colors.blue;
-
-  static Paint get blue_1_capButt => _stroke_1_capButt..color = Colors.blue;
-
-  static Paint get blueAccent_1_capRound =>
-      _stroke_1_capRound..color = Colors.blueAccent;
-
-  static Paint get blueAccent_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.blueAccent;
-
-  static Paint get blueAccent_1_capButt =>
-      _stroke_1_capButt..color = Colors.blueAccent;
-
-  static Paint get purple_1_capRound =>
-      _stroke_1_capRound..color = Colors.purple;
-
-  static Paint get purple_1_capSquare =>
-      _stroke_1_capSquare..color = Colors.purple;
-
-  static Paint get purple_1_capButt => _stroke_1_capButt..color = Colors.purple;
-
-  // 2
-  static Paint get black_2_capRound => _stroke_2_capRound..color = Colors.black;
-
-  static Paint get black_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.black;
-
-  static Paint get black_2_capButt => _stroke_2_capButt..color = Colors.black;
-
-  static Paint get white_2_capRound => _stroke_2_capRound..color = Colors.white;
-
-  static Paint get white_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.white;
-
-  static Paint get white_2_capButt => _stroke_2_capButt..color = Colors.white;
-
-  static Paint get red_2_capRound => _stroke_2_capRound..color = Colors.red;
-
-  static Paint get red_2_capSquare => _stroke_2_capSquare..color = Colors.red;
-
-  static Paint get red_2_capButt => _stroke_2_capButt..color = Colors.red;
-
-  static Paint get orange_2_capRound =>
-      _stroke_2_capRound..color = Colors.orange;
-
-  static Paint get orange_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.orange;
-
-  static Paint get orange_2_capButt => _stroke_2_capButt..color = Colors.orange;
-
-  static Paint get yellow_2_capRound =>
-      _stroke_2_capRound..color = Colors.yellow;
-
-  static Paint get yellow_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.yellow;
-
-  static Paint get yellow_2_capButt => _stroke_2_capButt..color = Colors.yellow;
-
-  static Paint get green_2_capRound => _stroke_2_capRound..color = Colors.green;
-
-  static Paint get green_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.green;
-
-  static Paint get green_2_capButt => _stroke_2_capButt..color = Colors.green;
-
-  static Paint get blue_2_capRound => _stroke_2_capRound..color = Colors.blue;
-
-  static Paint get blue_2_capSquare => _stroke_2_capSquare..color = Colors.blue;
-
-  static Paint get blue_2_capButt => _stroke_2_capButt..color = Colors.blue;
-
-  static Paint get blueAccent_2_capRound =>
-      _stroke_2_capRound..color = Colors.blueAccent;
-
-  static Paint get blueAccent_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.blueAccent;
-
-  static Paint get blueAccent_2_capButt =>
-      _stroke_2_capButt..color = Colors.blueAccent;
-
-  static Paint get purple_2_capRound =>
-      _stroke_2_capRound..color = Colors.purple;
-
-  static Paint get purple_2_capSquare =>
-      _stroke_2_capSquare..color = Colors.purple;
-
-  static Paint get purple_2_capButt => _stroke_2_capButt..color = Colors.purple;
-
-  // 3
-  static Paint get black_3_capRound => _stroke_3_capRound..color = Colors.black;
-
-  static Paint get black_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.black;
-
-  static Paint get black_3_capButt => _stroke_3_capButt..color = Colors.black;
-
-  static Paint get white_3_capRound => _stroke_3_capRound..color = Colors.white;
-
-  static Paint get white_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.white;
-
-  static Paint get white_3_capButt => _stroke_3_capButt..color = Colors.white;
-
-  static Paint get red_3_capRound => _stroke_3_capRound..color = Colors.red;
-
-  static Paint get red_3_capSquare => _stroke_3_capSquare..color = Colors.red;
-
-  static Paint get red_3_capButt => _stroke_3_capButt..color = Colors.red;
-
-  static Paint get orange_3_capRound =>
-      _stroke_3_capRound..color = Colors.orange;
-
-  static Paint get orange_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.orange;
-
-  static Paint get orange_3_capButt => _stroke_3_capButt..color = Colors.orange;
-
-  static Paint get yellow_3_capRound =>
-      _stroke_3_capRound..color = Colors.yellow;
-
-  static Paint get yellow_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.yellow;
-
-  static Paint get yellow_3_capButt => _stroke_3_capButt..color = Colors.yellow;
-
-  static Paint get green_3_capRound => _stroke_3_capRound..color = Colors.green;
-
-  static Paint get green_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.green;
-
-  static Paint get green_3_capButt => _stroke_3_capButt..color = Colors.green;
-
-  static Paint get blue_3_capRound => _stroke_3_capRound..color = Colors.blue;
-
-  static Paint get blue_3_capSquare => _stroke_3_capSquare..color = Colors.blue;
-
-  static Paint get blue_3_capButt => _stroke_3_capButt..color = Colors.blue;
-
-  static Paint get blueAccent_3_capRound =>
-      _stroke_3_capRound..color = Colors.blueAccent;
-
-  static Paint get blueAccent_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.blueAccent;
-
-  static Paint get blueAccent_3_capButt =>
-      _stroke_3_capButt..color = Colors.blueAccent;
-
-  static Paint get purple_3_capRound =>
-      _stroke_3_capRound..color = Colors.purple;
-
-  static Paint get purple_3_capSquare =>
-      _stroke_3_capSquare..color = Colors.purple;
-
-  static Paint get purple_3_capButt => _stroke_3_capButt..color = Colors.purple;
-
-  // 4
-  static Paint get black_4_capRound => _stroke_4_capRound..color = Colors.black;
-
-  static Paint get black_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.black;
-
-  static Paint get black_4_capButt => _stroke_4_capButt..color = Colors.black;
-
-  static Paint get white_4_capRound => _stroke_4_capRound..color = Colors.white;
-
-  static Paint get white_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.white;
-
-  static Paint get white_4_capButt => _stroke_4_capButt..color = Colors.white;
-
-  static Paint get red_4_capRound => _stroke_4_capRound..color = Colors.red;
-
-  static Paint get red_4_capSquare => _stroke_4_capSquare..color = Colors.red;
-
-  static Paint get red_4_capButt => _stroke_4_capButt..color = Colors.red;
-
-  static Paint get orange_4_capRound =>
-      _stroke_4_capRound..color = Colors.orange;
-
-  static Paint get orange_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.orange;
-
-  static Paint get orange_4_capButt => _stroke_4_capButt..color = Colors.orange;
-
-  static Paint get yellow_4_capRound =>
-      _stroke_4_capRound..color = Colors.yellow;
-
-  static Paint get yellow_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.yellow;
-
-  static Paint get yellow_4_capButt => _stroke_4_capButt..color = Colors.yellow;
-
-  static Paint get green_4_capRound => _stroke_4_capRound..color = Colors.green;
-
-  static Paint get green_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.green;
-
-  static Paint get green_4_capButt => _stroke_4_capButt..color = Colors.green;
-
-  static Paint get blue_4_capRound => _stroke_4_capRound..color = Colors.blue;
-
-  static Paint get blue_4_capSquare => _stroke_4_capSquare..color = Colors.blue;
-
-  static Paint get blue_4_capButt => _stroke_4_capButt..color = Colors.blue;
-
-  static Paint get blueAccent_4_capRound =>
-      _stroke_4_capRound..color = Colors.blueAccent;
-
-  static Paint get blueAccent_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.blueAccent;
-
-  static Paint get blueAccent_4_capButt =>
-      _stroke_4_capButt..color = Colors.blueAccent;
-
-  static Paint get purple_4_capRound =>
-      _stroke_4_capRound..color = Colors.purple;
-
-  static Paint get purple_4_capSquare =>
-      _stroke_4_capSquare..color = Colors.purple;
-
-  static Paint get purple_4_capButt => _stroke_4_capButt..color = Colors.purple;
-
-  // 5
-  static Paint get black_5_capRound => _stroke_5_capRound..color = Colors.black;
-
-  static Paint get black_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.black;
-
-  static Paint get black_5_capButt => _stroke_5_capButt..color = Colors.black;
-
-  static Paint get white_5_capRound => _stroke_5_capRound..color = Colors.white;
-
-  static Paint get white_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.white;
-
-  static Paint get white_5_capButt => _stroke_5_capButt..color = Colors.white;
-
-  static Paint get red_5_capRound => _stroke_5_capRound..color = Colors.red;
-
-  static Paint get red_5_capSquare => _stroke_5_capSquare..color = Colors.red;
-
-  static Paint get red_5_capButt => _stroke_5_capButt..color = Colors.red;
-
-  static Paint get orange_5_capRound =>
-      _stroke_5_capRound..color = Colors.orange;
-
-  static Paint get orange_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.orange;
-
-  static Paint get orange_5_capButt => _stroke_5_capButt..color = Colors.orange;
-
-  static Paint get yellow_5_capRound =>
-      _stroke_5_capRound..color = Colors.yellow;
-
-  static Paint get yellow_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.yellow;
-
-  static Paint get yellow_5_capButt => _stroke_5_capButt..color = Colors.yellow;
-
-  static Paint get green_5_capRound => _stroke_5_capRound..color = Colors.green;
-
-  static Paint get green_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.green;
-
-  static Paint get green_5_capButt => _stroke_5_capButt..color = Colors.green;
-
-  static Paint get blue_5_capRound => _stroke_5_capRound..color = Colors.blue;
-
-  static Paint get blue_5_capSquare => _stroke_5_capSquare..color = Colors.blue;
-
-  static Paint get blue_5_capButt => _stroke_5_capButt..color = Colors.blue;
-
-  static Paint get blueAccent_5_capRound =>
-      _stroke_5_capRound..color = Colors.blueAccent;
-
-  static Paint get blueAccent_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.blueAccent;
-
-  static Paint get blueAccent_5_capButt =>
-      _stroke_5_capButt..color = Colors.blueAccent;
-
-  static Paint get purple_5_capRound =>
-      _stroke_5_capRound..color = Colors.purple;
-
-  static Paint get purple_5_capSquare =>
-      _stroke_5_capSquare..color = Colors.purple;
-
-  static Paint get purple_5_capButt => _stroke_5_capButt..color = Colors.purple;
-
-  /// eraser
-  static Paint get _eraser => _stroke..color = Colors.transparent;
-
-  static Paint get _eraser_clear => _eraser..blendMode = BlendMode.clear;
-
-  static Paint get eraser_1 => _eraser_clear..strokeWidth = 1;
-
-  static Paint get eraser_2 => _eraser_clear..strokeWidth = 2;
-
-  static Paint get eraser_3 => _eraser_clear..strokeWidth = 3;
-
-  static Paint get eraser_4 => _eraser_clear..strokeWidth = 4;
-
-  static Paint get eraser_5 => _eraser_clear..strokeWidth = 5;
-}
-
-extension KMaskFilter on Paint {
-  /// normal
-  static const MaskFilter normal_05 = MaskFilter.blur(BlurStyle.normal, 0.5);
-  static const MaskFilter normal_1 = MaskFilter.blur(BlurStyle.normal, 1);
-  static const MaskFilter normal_2 = MaskFilter.blur(BlurStyle.normal, 2);
-  static const MaskFilter normal_3 = MaskFilter.blur(BlurStyle.normal, 3);
-  static const MaskFilter normal_4 = MaskFilter.blur(BlurStyle.normal, 4);
-  static const MaskFilter normal_5 = MaskFilter.blur(BlurStyle.normal, 5);
-  static const MaskFilter normal_6 = MaskFilter.blur(BlurStyle.normal, 6);
-  static const MaskFilter normal_7 = MaskFilter.blur(BlurStyle.normal, 7);
-  static const MaskFilter normal_8 = MaskFilter.blur(BlurStyle.normal, 8);
-  static const MaskFilter normal_9 = MaskFilter.blur(BlurStyle.normal, 9);
-  static const MaskFilter normal_10 = MaskFilter.blur(BlurStyle.normal, 10);
-
-  /// solid
-  static const MaskFilter solid_05 = MaskFilter.blur(BlurStyle.solid, 0.5);
-}
-
+/// shape border
+/// below is the hierarchy condense from https://api.flutter.dev/flutter/painting/ShapeBorder-class.html at 2023/09/16
 ///
-/// [Divider], [Border]
+/// [ShapeBorder]
+///   * [BoxBorder]
+///     * [Border]                          ([KBoxBorder])
+///     * [BorderDirectional]
+///   * [OutlinedBorder]
+///     * [StarBorder]
+///     * [LinearBorder]
+///     * [StadiumBorder]
+///     * [BeveledRectangleBorder]
+///     * [RoundedRectangleBorder]          ([KOutlinedBorderRounded])
+///     * [ContinuousRectangleBorder]       ([KOutlinedBorderContinuousRadius])
+///     * [MaterialStateOutlinedBorder]
+///     * [CircleBorder]                    ([KOutlinedBorderCircle])
+///       * [OvalBorder]
+///   * [InputBorder]
+///     * [OutlineInputBorder]              ([KInputBorderOutline])
+///     * [UnderlineInputBorder]
 ///
-
-extension KDivider on Divider {
-  static const white = Divider(color: Colors.white);
-  static const black_3 = Divider(thickness: 3);
-}
-
-extension KBorderSide on BorderSide {
-  static const black25_02 = BorderSide(color: Colors.black26, width: 0.2);
-  static const alignCenter_3 = BorderSide(
-    strokeAlign: BorderSide.strokeAlignCenter,
-    width: 3,
-  );
-}
-
-extension KBorder on Border {
+/// [KBorderSideBlack]
+///
+///
+extension KBoxBorder on BoxBorder {
   static const none = Border();
-  static const circle = CircleBorder();
-  static const sideCenter3 = Border.fromBorderSide(KBorderSide.alignCenter_3);
+  static const sideCenter1 = Border.fromBorderSide(KBorderSideBlack.center_1);
+  static const sideCenter2 = Border.fromBorderSide(KBorderSideBlack.center_2);
+  static const sideCenter3 = Border.fromBorderSide(KBorderSideBlack.center_3);
+  static const sideCenter4 = Border.fromBorderSide(KBorderSideBlack.center_4);
+  static const sideCenter5 = Border.fromBorderSide(KBorderSideBlack.center_5);
+  static const sideCenter6 = Border.fromBorderSide(KBorderSideBlack.center_6);
+  static const sideCenter7 = Border.fromBorderSide(KBorderSideBlack.center_7);
+  static const sideCenter8 = Border.fromBorderSide(KBorderSideBlack.center_8);
+  static const sideCenter9 = Border.fromBorderSide(KBorderSideBlack.center_9);
+  static const sideCenter10 = Border.fromBorderSide(KBorderSideBlack.center_10);
 }
 
-extension KBorderWithRadius on Border {
-  static const roundRect_8 =
+extension KOutlinedBorderCircle on OutlinedBorder {
+  static const none = CircleBorder();
+}
+
+extension KOutlinedBorderRounded on OutlinedBorder {
+  static const allCircular_8 =
       RoundedRectangleBorder(borderRadius: KBorderRadius.allCircular_8);
-  static const roundRect_20 =
+  static const allCircular_20 =
       RoundedRectangleBorder(borderRadius: KBorderRadius.allCircular_20);
-  static const roundRectVertical_0_8 =
+  static const vertical_0_8 =
       RoundedRectangleBorder(borderRadius: KBorderRadius.vertical_0_8);
-  static const continuousRectVertical_0_56 =
+}
+
+extension KOutlinedBorderContinuousRadius on OutlinedBorder {
+  static const vertical_0_10 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_10);
+  static const vertical_0_12 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_12);
+  static const vertical_0_14 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_14);
+  static const vertical_0_16 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_16);
+  static const vertical_0_18 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_18);
+  static const vertical_0_20 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_20);
+  static const vertical_0_30 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_30);
+  static const vertical_0_40 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_40);
+  static const vertical_0_50 =
+      ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_50);
+  static const vertical_0_56 =
       ContinuousRectangleBorder(borderRadius: KBorderRadius.vertical_0_56);
 }
 
-///
-/// [SizedBox], [Container]
-///
-
-extension KSizedBox on SizedBox {
-  static const none = SizedBox();
-  static const shrink = SizedBox.shrink();
-  static const expand = SizedBox.expand();
-  static const h16 = SizedBox(height: 16);
-  static const h32 = SizedBox(height: 32);
-  static const h10 = SizedBox(height: 10);
-  static const h20 = SizedBox(height: 20);
-  static const h100 = SizedBox(height: 100);
-  static const h160 = SizedBox(height: 160);
-
-  static const square16 = SizedBox.square(dimension: 16);
-  static const square32 = SizedBox.square(dimension: 32);
-  static const square10 = SizedBox.square(dimension: 10);
-  static const square20 = SizedBox.square(dimension: 20);
-  static const square50 = SizedBox.square(dimension: 50);
-  static const square100 = SizedBox.square(dimension: 100);
-
-  static const infinityW_100H = SizedBox(height: 100, width: double.infinity);
-  static const infinityW_200H = SizedBox(height: 200, width: double.infinity);
-  static const infinityW_300H = SizedBox(height: 300, width: double.infinity);
-  static const infinityW_400H = SizedBox(height: 400, width: double.infinity);
-  static const infinityW_500H = SizedBox(height: 500, width: double.infinity);
-  static const infinityW_128H = SizedBox(height: 128, width: double.infinity);
-  static const infinityW_256H = SizedBox(height: 256, width: double.infinity);
-  static const infinityW_512H = SizedBox(height: 512, width: double.infinity);
-
-  static const infinityH_16W = SizedBox(height: double.infinity, width: 16);
-  static const infinityH_32W = SizedBox(height: double.infinity, width: 32);
-  static const infinityH_64W = SizedBox(height: double.infinity, width: 64);
-  static const infinityH_128W = SizedBox(height: double.infinity, width: 128);
+extension KOutlinedBorderContinuousSideRadius on OutlinedBorder {
+  static const insideBlack26_02_vertical_0_10 = ContinuousRectangleBorder(
+    side: KBorderSideBlack.inside26_02,
+    borderRadius: KBorderRadius.vertical_0_10,
+  );
+  static const insideBlack26_02_vertical_0_16 = ContinuousRectangleBorder(
+    side: KBorderSideBlack.inside26_02,
+    borderRadius: KBorderRadius.vertical_0_16,
+  );
 }
 
-///
-/// container
-///
-
-extension VContainer on Container {
-  static Expanded get expanded => Expanded(child: Container());
-
-  static Container get squareRed_10 =>
-      Container(color: Colors.red, width: 10, height: 10);
-
-  static Container get squareYellow_10 =>
-      Container(color: Colors.yellow, width: 10, height: 10);
-
-  static Container get squareGreen_10 =>
-      Container(color: Colors.green, width: 10, height: 10);
-
-  static Container get squareBlue_10 =>
-      Container(color: Colors.blue, width: 10, height: 10);
-
-  static Container get squareRed_50 =>
-      Container(color: Colors.red, width: 50, height: 50);
-
-  static Container get squareYellow_50 =>
-      Container(color: Colors.yellow, width: 50, height: 50);
-
-  static Container get squareGreen_50 =>
-      Container(color: Colors.green, width: 50, height: 50);
-
-  static Container get squareBlue_50 =>
-      Container(color: Colors.blue, width: 50, height: 50);
-
-  static Container get squareRed_100 =>
-      Container(color: Colors.red, width: 100, height: 100);
-
-  static Container get squareOrange_100 =>
-      Container(color: Colors.orange, width: 100, height: 100);
-
-  static Container get squareYellow_100 =>
-      Container(color: Colors.yellow, width: 100, height: 100);
-
-  static Container get squareGreen_100 =>
-      Container(color: Colors.green, width: 100, height: 100);
-
-  static Container get squareBlue_100 =>
-      Container(color: Colors.blue, width: 100, height: 100);
-
-  static Container get squarePurple_100 =>
-      Container(color: Colors.purple, width: 100, height: 100);
-
-  static Container get squareBrown_100 =>
-      Container(color: Colors.brown, width: 100, height: 100);
-
-  static Container get squareRed_300 =>
-      Container(color: Colors.red, width: 300, height: 300);
-
-  static Container get squareYellow_300 =>
-      Container(color: Colors.yellow, width: 300, height: 300);
-
-  static Container get squareGreen_300 =>
-      Container(color: Colors.green, width: 300, height: 300);
-
-  static Container get squareBlue_300 =>
-      Container(color: Colors.blue, width: 300, height: 300);
+extension KInputBorderOutline on InputBorder {
+  static const none = OutlineInputBorder();
 }
 
-extension VContainerBorder on Container {
-  static Container get squareBlue_100 => Container(
-        width: 100,
-        height: 100,
-        decoration: VBoxDecorationBorder.allBlue,
+extension KInputBorderOutlineSolidInside on InputBorder {
+  static const black26_02 = OutlineInputBorder(
+    borderSide: KBorderSideBlack.inside26_02,
+  );
+
+  static const blueGrey_1_allCircular_10 = OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.blueGrey, width: 1.5),
+    borderRadius: KBorderRadius.allCircular_10,
+  );
+}
+
+extension KBorderSideBlack on BorderSide {
+  static const inside26_02 = BorderSide(color: Colors.black26, width: 0.2);
+  static const center_1 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 1);
+  static const center_2 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 2);
+  static const center_3 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 3);
+  static const center_4 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 4);
+  static const center_5 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 5);
+  static const center_6 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 6);
+  static const center_7 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 7);
+  static const center_8 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 8);
+  static const center_9 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 9);
+  static const center_10 =
+      BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 10);
+}
+
+extension FBorderSide on BorderSide {
+  static BorderSide solidInside({
+    Color color = Colors.blueGrey,
+    double width = 1.5,
+  }) =>
+      BorderSide(
+        color: color,
+        width: width,
+        style: BorderStyle.solid,
+        strokeAlign: BorderSide.strokeAlignInside,
+      );
+
+  static BorderSide solidCenter({
+    Color color = Colors.blueGrey,
+    double width = 1.5,
+  }) =>
+      BorderSide(
+        color: color,
+        width: width,
+        style: BorderStyle.solid,
+        strokeAlign: BorderSide.strokeAlignCenter,
+      );
+
+  static BorderSide solidOutside({
+    Color color = Colors.blueGrey,
+    double width = 1.5,
+  }) =>
+      BorderSide(
+        color: color,
+        width: width,
+        style: BorderStyle.solid,
+        strokeAlign: BorderSide.strokeAlignOutside,
       );
 }
 
-extension VContainerStyled on Container {
-  static Container get blueStyle1 => Container(
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: KBorderRadius.allCircular_10,
-          boxShadow: [_VBoxShadowBlack.o50Style1],
-        ),
-      );
-
-  static Container get gradiantWhitRed => Container(
-        height: 100,
-        width: 100,
-        decoration: KBoxDecoration.gradientWR,
-      );
-}
-
+///
 ///
 /// [BoxShadow]
 ///
-
-extension _VBoxShadowBlack on BoxShadow {
-  static BoxShadow get o50Style1 => BoxShadow(
-        color: VColor.blackO_50,
-        offset: KOffset.y_3,
-        spreadRadius: 5,
-        blurRadius: 7,
+///
+/// [blurNormalOf]
+/// [blurSolidOf]
+/// [blurOuterOf]
+/// [blurInnerOf]
+///
+///
+///
+extension FBoxShadow on BoxShadow {
+  static BoxShadow blurNormalOf({
+    Color color = Colors.white,
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      BoxShadow(
+        color: color,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+        blurStyle: BlurStyle.normal,
       );
 
-  static BoxShadow get o20Style1 => BoxShadow(
-        color: VColor.blackO_50,
-        spreadRadius: 5,
-        blurRadius: 7,
-        offset: KOffset.y_3,
+  static BoxShadow blurSolidOf({
+    Color color = Colors.white,
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      BoxShadow(
+        color: color,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+        blurStyle: BlurStyle.solid,
+      );
+
+  static BoxShadow blurOuterOf({
+    Color color = Colors.white,
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      BoxShadow(
+        color: color,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+        blurStyle: BlurStyle.outer,
+      );
+
+  static BoxShadow blurInnerOf({
+    Color color = Colors.white,
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      BoxShadow(
+        color: color,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+        blurStyle: BlurStyle.inner,
       );
 }
 
-extension _KBoxShadowNormal on BoxShadow {
-  static const blackStyle1 =
-      BoxShadow(offset: KCoordinate.cube_2, blurRadius: 15, spreadRadius: 25);
-  static const blackStyle2 = BoxShadow(
-    offset: KOffset.y_5N,
-    blurRadius: 60,
-    spreadRadius: 40,
-  );
-  static const blackStyle3 = BoxShadow(
-    spreadRadius: 10,
-  );
-  static const blackStyle4 = BoxShadow(
-    offset: KOffset.y_1,
-    blurRadius: 10,
-    spreadRadius: -25,
-  );
-  static const blackStyle5 = BoxShadow(
-    offset: KOffset.y_6,
-    blurRadius: 20,
-    spreadRadius: 10,
-  );
-  static const blackStyle6 = BoxShadow(
-    offset: KCoordinate.cube_3,
-    blurRadius: 6,
-    spreadRadius: 15,
-  );
-  static const blackStyle7 = BoxShadow(
-    offset: KOffset.xy_80_5N,
-    blurRadius: 8,
-  );
-  static const blackStyle8 = BoxShadow(
-    offset: KOffset.x_2,
-    spreadRadius: 12,
-  );
-  static const blackStyle9 = BoxShadow(
-    offset: KOffset.xy_12N_16N,
-    spreadRadius: 3,
-  );
-  static const blackStyle10 = BoxShadow(
-    blurRadius: 16,
-    spreadRadius: 3,
-  );
+extension FBoxShadowGrey on BoxShadow {
+  static BoxShadow blurNormalOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurNormalOf(
+        color: Colors.grey,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 
-  static const greyStyle1 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.y_1,
-    blurRadius: 1,
-    spreadRadius: 12,
-  );
-  static const greyStyle2 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.xy_2_6,
-    blurRadius: 10,
-  );
-  static const greyStyle3 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.y_3,
-    blurRadius: 5,
-    spreadRadius: 10,
-  );
-  static const greyStyle4 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.xy_4_30,
-    blurRadius: 20,
-    spreadRadius: 10,
-  );
-  static const greyStyle5 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.xy_30_15,
-    blurRadius: 5,
-    spreadRadius: 10,
-  );
-  static const greyStyle6 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.xy_5_20,
-    blurRadius: 5,
-    spreadRadius: 8,
-  );
-  static const greyStyle7 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.x_10,
-    blurRadius: 5,
-    spreadRadius: 5,
-  );
-  static const greyStyle8 = BoxShadow(
-    color: Colors.grey,
-    offset: KOffset.xy_35_8N,
-    blurRadius: 1,
-    spreadRadius: -10,
-  );
+  static BoxShadow blurSolidOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurSolidOf(
+        color: Colors.grey,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 
-  static const brownStyle1 = BoxShadow(
-    color: Colors.brown,
-    blurRadius: 1,
-    spreadRadius: 1,
-  );
+  static BoxShadow blurOuterOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurOuterOf(
+        color: Colors.grey,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 
-  static const orangeStyle1 = BoxShadow(
-    color: Colors.orange,
-    blurRadius: 20,
-    spreadRadius: 2,
-  );
-
-  static const blueGreyStyle1 = BoxShadow(
-    color: Colors.blueGrey,
-    blurRadius: 5,
-    spreadRadius: 5,
-  );
-
-  static const indigoStyle1 = BoxShadow(
-    color: Colors.indigo,
-    offset: KCoordinateDirection.right,
-    blurRadius: 5,
-    spreadRadius: 10,
-  );
-
-  static const tealStyle1 = BoxShadow(
-    color: Colors.teal,
-    offset: KCoordinateDirection.left,
-    blurRadius: 1,
-    spreadRadius: 1,
-  );
+  static BoxShadow blurInnerOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurInnerOf(
+        color: Colors.grey,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 }
 
-extension _KBoxShadowOuter on BoxShadow {
-  static const blackStyle1 = BoxShadow(
-    blurStyle: BlurStyle.outer,
-    offset: KOffset.xy_2_5,
-    blurRadius: 40,
-    spreadRadius: 40,
-  );
+extension FBoxShadowBlack on BoxShadow {
+  static BoxShadow blurNormalOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurNormalOf(
+        color: Colors.black,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 
-  static const blackStyle2 = BoxShadow(
-    blurStyle: BlurStyle.outer,
-    blurRadius: 1,
-    spreadRadius: 10,
-  );
-  static const blackStyle3 = BoxShadow(
-    blurStyle: BlurStyle.outer,
-    blurRadius: 10,
-    spreadRadius: 10,
-  );
+  static BoxShadow blurSolidOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurSolidOf(
+        color: Colors.black,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 
-  static const greyStyle1 = BoxShadow(
-    blurStyle: BlurStyle.outer,
-    color: Colors.grey,
-    blurRadius: 5,
-    spreadRadius: 10,
-  );
-  static const greyStyle2 = BoxShadow(
-    blurStyle: BlurStyle.outer,
-    color: Colors.grey,
-    offset: KCoordinateDirection.bottomRight,
-    blurRadius: 10,
-    spreadRadius: 20,
-  );
+  static BoxShadow blurOuterOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurOuterOf(
+        color: Colors.black,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 
-  static const deepPurpleStyle2 = BoxShadow(
-    blurStyle: BlurStyle.outer,
-    color: Colors.deepPurple,
-    offset: KCoordinateDirection.bottomLeft,
-    blurRadius: 1,
-    spreadRadius: 1,
-  );
+  static BoxShadow blurInnerOf({
+    Offset offset = Offset.zero,
+    double spreadRadius = 0.0,
+    double blurRadius = 0.0,
+  }) =>
+      FBoxShadow.blurInnerOf(
+        color: Colors.black,
+        offset: offset,
+        spreadRadius: spreadRadius,
+        blurRadius: blurRadius,
+      );
 }
-
-extension _KBoxShadowInner on BoxShadow {}
-
-extension _KBoxShadowSolid on BoxShadow {}
 
 ///
-/// [Decoration]
+///
+///
+/// decoration
+/// [FDecorationBox], [KDecorationBox],
+/// [FDecorationShape], [KDecorationShapeInputOutline]
+/// [FDecorationInput], [KDecorationInput]
+///
+///
+///
 ///
 
-extension VBoxDecorationBorder on BoxDecoration {
-  static BoxDecoration get allBlack => BoxDecoration(
-        border: Border.all(color: Colors.black),
-      );
-
-  static BoxDecoration get allBlue => BoxDecoration(
-        border: Border.all(color: Colors.blue),
-      );
-
-  static BoxDecoration get allOrange => BoxDecoration(
-        border: Border.all(color: Colors.blue),
-      );
+extension KDecorationBox on BoxDecoration {
+  static const none = BoxDecoration();
+  static const circle = BoxDecoration(shape: BoxShape.circle);
 }
 
-extension VBoxDecorationStyled on BoxDecoration {
-  static BoxDecoration get style1 => BoxDecoration(
-        color: Colors.white,
-        borderRadius: KBorderRadius.allCircular_20,
-        boxShadow: [_VBoxShadowBlack.o50Style1],
-      );
-
-  static BoxDecoration style1Of({
-    required BuildContext context,
-    required Color color,
+extension FDecorationBox on BoxDecoration {
+  static BoxDecoration of({
+    Color? color,
+    BoxBorder? border,
+    BorderRadiusGeometry? borderRadius,
+    List<BoxShadow>? boxShadow,
+    Gradient? gradient,
+    BlendMode? backgroundBlendMode,
+    DecorationImage? image,
   }) =>
       BoxDecoration(
-        borderRadius: KBorderRadius.allCircular_10,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [context.theme.primaryColor, color],
-        ),
+        color: color,
+        border: border,
+        borderRadius: borderRadius,
+        boxShadow: boxShadow,
+        gradient: gradient,
+        backgroundBlendMode: backgroundBlendMode,
+        image: image,
       );
 }
 
-extension KShapeDecoration on ShapeDecoration {
+extension FDecorationShape on ShapeDecoration {
   static const stadiumGrey = ShapeDecoration(
     shape: StadiumBorder(),
     color: Colors.grey,
   );
   static const roundRect_8 = ShapeDecoration(
-    shape: KBorderWithRadius.roundRect_8,
+    shape: KOutlinedBorderRounded.allCircular_8,
   );
 
-  static const outlineBlack25_02 = ShapeDecoration(
-    shape: KInputBorder.outlineBlack25_02,
-  );
+  static ShapeDecoration of({
+    Color? color,
+    Gradient? gradient,
+    List<BoxShadow>? shadows,
+    DecorationImage? image,
+    required ShapeBorder shape,
+  }) =>
+      ShapeDecoration(
+        shape: shape,
+        color: color,
+        gradient: gradient,
+        shadows: shadows,
+        image: image,
+      );
 }
 
-extension KBoxDecoration on BoxDecoration {
-  static const none = BoxDecoration();
-  static const blueGrey = BoxDecoration(color: Colors.blueGrey);
-
-  static const circle = BoxDecoration(shape: BoxShape.circle);
-  static const circleGreen = BoxDecoration(
-    color: Colors.green,
-    shape: BoxShape.circle,
+extension KDecorationShapeInputOutline on ShapeDecoration {
+  static const black26_02 = ShapeDecoration(
+    shape: KInputBorderOutlineSolidInside.black26_02,
   );
-
-  static const gradientWR = BoxDecoration(gradient: KLinearGradiant.whiteToRed);
-}
-
-extension KBoxDecorationBorderRadius on BoxDecoration {
-  static const circularAll_10 =
-      BoxDecoration(borderRadius: KBorderRadius.allCircular_10);
-  static const circularAll_20 =
-      BoxDecoration(borderRadius: KBorderRadius.allCircular_20);
-
-  static const circularAllWhite_10 = BoxDecoration(
-    color: Colors.white,
-    borderRadius: KBorderRadius.allCircular_10,
-  );
-
-  static const circularAllGrey_10 = BoxDecoration(
-    color: Colors.grey,
-    borderRadius: KBorderRadius.allCircular_10,
-  );
-  static const circularAllBlueGrey_20 = BoxDecoration(
-    color: Colors.blueGrey,
-    borderRadius: KBorderRadius.allCircular_20,
-  );
-  static const circularAllBlueGrey_30 = BoxDecoration(
-    color: Colors.blueGrey,
-    borderRadius: KBorderRadius.allCircular_30,
-  );
-}
-
-extension KBoxDecorationStyled on BoxDecoration {
-  static const borderBottom =
-      BoxDecoration(border: Border(bottom: BorderSide()));
-}
-
-extension KBoxDecorationShadow1 on BoxDecoration {
-  static const normalBlack1 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle1]);
-  static const normalBlack2 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle2]);
-  static const normalBlack3 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle3]);
-  static const normalBlack4 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle4]);
-  static const normalBlack5 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle5]);
-  static const normalBlack6 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle6]);
-  static const normalBlack7 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle7]);
-  static const normalBlack8 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle8]);
-  static const normalBlack9 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.blackStyle9]);
-
-  static const normalGrey1 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle1]);
-  static const normalGrey2 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle2]);
-  static const normalGrey3 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle3]);
-  static const normalGrey4 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle4]);
-
-  static const normalGrey5 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle5]);
-
-  static const normalGrey6 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle6]);
-  static const normalGrey7 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle7]);
-
-  static const normalGrey8 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.greyStyle8]);
-
-  static const normalOrange1 =
-      BoxDecoration(boxShadow: [_KBoxShadowNormal.orangeStyle1]);
-
-  static const outerBlack1 =
-      BoxDecoration(boxShadow: [_KBoxShadowOuter.blackStyle1]);
-  static const outerGrey1 = BoxDecoration(
-    boxShadow: [_KBoxShadowOuter.greyStyle1],
-  );
-}
-
-extension KBoxDecorationShadow1Border on BoxDecoration {
-  static const style1 = BoxDecoration(
-    border: KBorder.none,
-    boxShadow: [_KBoxShadowNormal.blackStyle9],
-  );
-}
-
-extension KBoxDecorationShadow2 on BoxDecoration {
-  static const style1 = BoxDecoration(boxShadow: [
-    _KBoxShadowNormal.brownStyle1,
-    _KBoxShadowOuter.blackStyle2,
-  ]);
-  static const style2 = BoxDecoration(boxShadow: [
-    _KBoxShadowNormal.blueGreyStyle1,
-    _KBoxShadowOuter.blackStyle3,
-  ]);
-
-  static const style3 = BoxDecoration(boxShadow: [
-    _KBoxShadowNormal.indigoStyle1,
-    _KBoxShadowOuter.greyStyle2,
-  ]);
-
-  static const style4 = BoxDecoration(boxShadow: [
-    _KBoxShadowNormal.tealStyle1,
-    _KBoxShadowOuter.deepPurpleStyle2,
-  ]);
 }
 
 ///
-/// component
+/// [of]
+/// [rowLabelIconText]
+///
+extension FDecorationInput on InputDecoration {
+  static InputDecoration of({
+    bool isCollapsed = false,
+    bool enabled = true,
+    bool? filled,
+    bool? alignLabelWithHint,
+    bool? isDense,
+    Widget? icon,
+    Widget? label,
+    Widget? error,
+    Widget? prefix,
+    Widget? suffix,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    Widget? counter,
+    String? labelText,
+    String? helperText,
+    String? hintText,
+    String? errorText,
+    String? prefixText,
+    String? suffixText,
+    String? counterText,
+    String? semanticCounterText,
+    BoxConstraints? constraints,
+    BoxConstraints? prefixIconConstraints,
+    BoxConstraints? suffixIconConstraints,
+    TextStyle? labelStyle,
+    TextStyle? helperStyle,
+    TextStyle? errorStyle,
+    TextStyle? hintStyle,
+    TextStyle? prefixStyle,
+    TextStyle? suffixStyle,
+    TextStyle? counterStyle,
+    TextStyle? floatingLabelStyle,
+    TextDirection? hintTextDirection,
+    int? hintMaxLines,
+    int? helperMaxLines,
+    int? errorMaxLines,
+    FloatingLabelBehavior? floatingLabelBehavior,
+    FloatingLabelAlignment? floatingLabelAlignment,
+    InputBorder? disabledBorder,
+    InputBorder? enabledBorder,
+    InputBorder? focusedBorder,
+    InputBorder? errorBorder,
+    InputBorder? focusedErrorBorder,
+    InputBorder? border,
+    EdgeInsetsGeometry? contentPadding,
+    Color? iconColor,
+    Color? prefixIconColor,
+    Color? suffixIconColor,
+    Color? fillColor,
+    Color? focusColor,
+    Color? hoverColor,
+  }) =>
+      InputDecoration(
+        icon: icon,
+        iconColor: iconColor,
+        label: label,
+        labelText: labelText,
+        labelStyle: labelStyle,
+        helperText: helperText,
+        helperStyle: helperStyle,
+        helperMaxLines: helperMaxLines,
+        hintText: hintText,
+        hintStyle: hintStyle,
+        hintTextDirection: hintTextDirection,
+        hintMaxLines: hintMaxLines,
+        error: error,
+        errorText: errorText,
+        errorStyle: errorStyle,
+        errorMaxLines: errorMaxLines,
+        floatingLabelStyle: floatingLabelStyle,
+        floatingLabelBehavior: floatingLabelBehavior,
+        floatingLabelAlignment: floatingLabelAlignment,
+        isDense: isDense,
+        contentPadding: contentPadding,
+        prefixIcon: prefixIcon,
+        prefixIconColor: prefixIconColor,
+        prefixIconConstraints: prefixIconConstraints,
+        prefix: prefix,
+        prefixText: prefixText,
+        prefixStyle: prefixStyle,
+        suffixIcon: suffixIcon,
+        suffixIconColor: suffixIconColor,
+        suffixIconConstraints: suffixIconConstraints,
+        suffix: suffix,
+        suffixText: suffixText,
+        suffixStyle: suffixStyle,
+        counter: counter,
+        counterText: counterText,
+        counterStyle: counterStyle,
+        isCollapsed: isCollapsed,
+        filled: filled,
+        fillColor: fillColor,
+        focusColor: focusColor,
+        hoverColor: hoverColor,
+        errorBorder: errorBorder,
+        focusedBorder: focusedBorder,
+        focusedErrorBorder: focusedErrorBorder,
+        disabledBorder: disabledBorder,
+        enabledBorder: enabledBorder,
+        border: border,
+        enabled: enabled,
+        semanticCounterText: semanticCounterText,
+        alignLabelWithHint: alignLabelWithHint,
+        constraints: constraints,
+      );
+
+  static InputDecoration rowLabelIconText({
+    InputBorder? border,
+    required Icon icon,
+    required String text,
+  }) =>
+      InputDecoration(
+        alignLabelWithHint: true,
+        border: border,
+        contentPadding: switch (border) {
+          KInputBorderOutline.none => null,
+          null => EdgeInsets.zero,
+          _ => throw UnimplementedError(),
+        },
+        label: Row(
+          children: [
+            icon,
+            Text(text, style: KTextStyle.roboto),
+          ],
+        ),
+      );
+}
+
+extension KDecorationInput on InputDecoration {
+  static const collapsed = InputDecoration.collapsed(hintText: '');
+
+  static const style1 = InputDecoration(
+    labelStyle: TextStyle(color: Colors.blueGrey),
+    enabledBorder: KInputBorderOutlineSolidInside.blueGrey_1_allCircular_10,
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blueGrey, width: 1.5),
+      borderRadius: KBorderRadius.allCircular_10,
+    ),
+    errorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+      borderRadius: KBorderRadius.allCircular_10,
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+      borderRadius: KBorderRadius.allCircular_10,
+    ),
+  );
+}
+
+///
+///
+///
+/// other
+///
+///
 ///
 
-extension KGridPaper on GridPaper {
-  static const none = GridPaper();
-  static const simple =
-      GridPaper(color: Colors.white, interval: 100, subdivisions: 1);
-
-  static const simpleList = <GridPaper>[simple, simple, simple];
-
-  static const simpleListList = <List<GridPaper>>[
-    <GridPaper>[simple, simple, simple],
-    <GridPaper>[simple, simple, simple]
-  ];
+extension KSpacer on Spacer {
+  static const Spacer none = Spacer();
 }
 
 extension KProgressIndicator on ProgressIndicator {
@@ -1237,115 +752,24 @@ extension KProgressIndicator on ProgressIndicator {
   static const refresh = RefreshProgressIndicator();
 }
 
-extension KIcon on Icon {
-  static const check = Icon(Icons.check);
-  static const cross = Icon(Icons.close);
-
-  static const plus = Icon(Icons.add);
-  static const minus = Icon(Icons.remove);
-  static const multiple = cross;
-  static const equal = Icon(CupertinoIcons.equal);
-
-  static const play = Icon(Icons.play_arrow);
-  static const pause = Icon(Icons.pause);
-  static const stop = Icon(Icons.stop);
-  static const edit = Icon(Icons.edit);
-  static const delete = Icon(Icons.delete);
-  static const cancel_24 = Icon(Icons.cancel, size: 24);
-  static const cancelSharp = Icon(Icons.cancel_sharp);
-  static const send = Icon(Icons.send);
-
-  static const arrowRight = Icon(Icons.arrow_forward_ios);
-  static const arrowLeft = Icon(Icons.arrow_back_ios);
-  static const arrowRightward = Icon(Icons.arrow_forward);
-  static const arrowLeftward = Icon(Icons.arrow_back);
-
-  static const accountBox = Icon(Icons.account_box);
-  static const accountCircle = Icon(Icons.account_circle);
-  static const backspace = Icon(Icons.backspace);
-  static const email = Icon(Icons.email);
-  static const mailOutline = Icon(Icons.mail_outline);
-  static const password = Icon(Icons.password);
-  static const phone = Icon(Icons.phone);
-  static const photo = Icon(Icons.photo);
-  static const photo_28 = Icon(Icons.photo, size: 28);
-  static const readMore = Icon(Icons.read_more);
-
-  static const accountCircleStyle1 = Icon(
-    Icons.account_circle,
-    size: 90,
-    color: Colors.grey,
-  );
-  static const accountCircleStyle2 = Icon(
-    Icons.account_circle,
-    size: 35,
-    color: Colors.grey,
-  );
-}
-
 extension KDrawer on Drawer {
   static const none = Drawer();
 }
 
-///
-/// text
-///
-
-extension KLaTexString on String {
-  static const quadraticRoots = r"{-b \pm \sqrt{b^2-4ac} \over 2a}";
-  static const sn = r"S_n";
-  static const x1_ = r"x_1 + x_2 + ... + x_n";
-  static const x1_3 = r"x_1 + x_2 + x_3";
-  static const x1_4 = r"x_1 + x_2 + x_3 + x_4";
-  static const x1_5 = r"x_1 + x_2 + x_3 + x_4 + x_5";
-  static const ax1_ = r"a_1x_1 + a_2x_2 + ... + a_nx_n";
-  static const ax1_3 = r"a_1x_1 + a_2x_2 + a_3x_3";
-  static const ax1_4 = r"a_1x_1 + a_2x_2 + a_3x_3 + a_4x_4";
-  static const ax1_5 = r"a_1x_1 + a_2x_2 + a_3x_3 + a_4x_4 + a_5x_5";
-}
-
-extension KLatexStringEquation on String {
-  static const quadraticRootsOfX = r"x = " + KLaTexString.quadraticRoots;
-  static const yLinearABX = r"y = a + bx";
-  static const yLinearMXK = r"y = mx + k";
-}
-
-extension KLatexStringMatrix1N on String {
-  static const y1_ = r"""\begin{bmatrix}
-  y_1\\
-  y_2\\
-  ...\\
-  y_n\\
-  \end{bmatrix}""";
-}
-
-extension KLatexStringMatrix2N on String {
-  static const const1_x1_ = r"""\begin{bmatrix}
-  1&x_1\\
-  1&x_2\\
-  ...&...\\
-  1&x_n\\
-  \end{bmatrix}""";
-}
-
-extension FLaTexString on String {
-  static String equationOf(Iterable<String> values) => values.reduce(
-        (a, b) => "$a = $b",
-      );
-}
-
 extension KTextStyle on TextStyle {
-  static const k20 = TextStyle(fontSize: 20);
-  static const k30 = TextStyle(fontSize: 30);
-  static const k40 = TextStyle(fontSize: 40);
-  static const k50 = TextStyle(fontSize: 50);
-  static const kWhite = TextStyle(color: Colors.white);
-  static const kBlack12 = TextStyle(color: Colors.black12);
-  static const kBlack26 = TextStyle(color: Colors.black26);
-  static const kBlack38 = TextStyle(color: Colors.black38);
-  static const kBlack45 = TextStyle(color: Colors.black45);
-  static const kBlack54 = TextStyle(color: Colors.black54);
-  static const kBlack87 = TextStyle(color: Colors.black87);
+  static const size_10 = TextStyle(fontSize: 10);
+  static const size_20 = TextStyle(fontSize: 20);
+  static const size_30 = TextStyle(fontSize: 30);
+  static const size_40 = TextStyle(fontSize: 40);
+  static const size_50 = TextStyle(fontSize: 50);
+  static const white = TextStyle(color: Colors.white);
+  static const black12 = TextStyle(color: Colors.black12);
+  static const black26 = TextStyle(color: Colors.black26);
+  static const black38 = TextStyle(color: Colors.black38);
+  static const black45 = TextStyle(color: Colors.black45);
+  static const black54 = TextStyle(color: Colors.black54);
+  static const black87 = TextStyle(color: Colors.black87);
+  static const black = TextStyle(color: Colors.black);
   static const roboto = TextStyle(fontFamily: 'Roboto');
 
   static const white_24 = TextStyle(color: Colors.white, fontSize: 24);
@@ -1378,52 +802,73 @@ extension KTextStyle on TextStyle {
   );
 }
 
-extension KInputBorder on InputBorder {
-  static const outline = OutlineInputBorder();
-  static const outlineBlack25_02 = OutlineInputBorder(
-    borderSide: KBorderSide.black25_02,
+extension VListView on ListView {
+  static ListView get bigSmall_25 => ListView.builder(
+        padding: KEdgeInsets.symV_8,
+        itemCount: 25,
+        itemBuilder: (context, index) => Container(
+          margin: KEdgeInsets.symHV_24_8,
+          height: index.isOdd ? 128 : 36,
+          decoration: BoxDecoration(
+            borderRadius: KBorderRadius.allCircular_8,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      );
+}
+
+extension KIconMaterial on Icon {
+  static const check = Icon(Icons.check);
+  static const close = Icon(Icons.close);
+
+  static const add = Icon(Icons.add);
+  static const minus = Icon(Icons.remove);
+  static const plus = add;
+  static const cross = close;
+  static const multiple = cross;
+  static const questionMark = Icon(Icons.question_mark);
+
+  static const play = Icon(Icons.play_arrow);
+  static const pause = Icon(Icons.pause);
+  static const stop = Icon(Icons.stop);
+  static const create = Icon(Icons.create);
+  static const edit = Icon(Icons.edit);
+  static const delete = Icon(Icons.delete);
+  static const cancel_24 = Icon(Icons.cancel, size: 24);
+  static const cancelSharp = Icon(Icons.cancel_sharp);
+  static const send = Icon(Icons.send);
+
+  static const arrowRight = Icon(Icons.arrow_forward_ios);
+  static const arrowLeft = Icon(Icons.arrow_back_ios);
+  static const arrowRightward = Icon(Icons.arrow_forward);
+  static const arrowLeftward = Icon(Icons.arrow_back);
+  static const chevronLeft = Icon(Icons.chevron_left);
+  static const chevronRight = Icon(Icons.chevron_right);
+
+  static const accountBox = Icon(Icons.account_box);
+  static const accountCircle = Icon(Icons.account_circle);
+  static const backspace = Icon(Icons.backspace);
+  static const email = Icon(Icons.email);
+  static const mailOutline = Icon(Icons.mail_outline);
+  static const password = Icon(Icons.password);
+  static const phone = Icon(Icons.phone);
+  static const photo = Icon(Icons.photo);
+  static const photo_28 = Icon(Icons.photo, size: 28);
+  static const readMore = Icon(Icons.read_more);
+  static const calendarToday = Icon(Icons.calendar_today);
+
+  static const accountCircleStyle1 = Icon(
+    Icons.account_circle,
+    size: 90,
+    color: Colors.grey,
+  );
+  static const accountCircleStyle2 = Icon(
+    Icons.account_circle,
+    size: 35,
+    color: Colors.grey,
   );
 }
 
-extension KInputDecoration on InputDecoration {
-  static const collapsed = InputDecoration.collapsed(hintText: '');
-
-  static const style1 = InputDecoration(
-    labelStyle: TextStyle(
-      color: Colors.blueGrey,
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.blueGrey, width: 1.5),
-      borderRadius: KBorderRadius.allCircular_10,
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.blueGrey, width: 1.5),
-      borderRadius: KBorderRadius.allCircular_10,
-    ),
-    errorBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red, width: 1.5),
-      borderRadius: KBorderRadius.allCircular_10,
-    ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red, width: 1.5),
-      borderRadius: KBorderRadius.allCircular_10,
-    ),
-  );
-}
-
-extension KLinearGradiant on LinearGradient {
-  static const whiteToRed = LinearGradient(colors: [Colors.white, Colors.red]);
-  static const redToWhite = LinearGradient(colors: [Colors.red, Colors.white]);
-}
-
-extension KLinearGradiantStyled on LinearGradient {
-  static const style1 = LinearGradient(
-    begin: Alignment.center,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color.fromARGB(189, 218, 218, 252),
-      Color.fromARGB(189, 218, 218, 252),
-      Colors.transparent,
-    ],
-  );
+extension KIconMaterialWhite on Icon {
+  static const add = Icon(Icons.add, color: Colors.white);
 }

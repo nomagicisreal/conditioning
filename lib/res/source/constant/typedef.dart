@@ -2,94 +2,80 @@ part of source;
 
 ///
 /// this file contains:
+/// generics:
+/// [Processor]                   (with 1 argument, return void)
+/// [Conductor]                   (with 2 argument, return void)
+/// [Caller]                      (without argument, return value)
+/// [Mapper], [MapperWith]        (return value that has the same type with argument)
+/// [Reducer], [ReducerWith]      (return value that comes from two argument with same type)
+/// [Generator]                   (return value from index)
+/// [Translator]                  (return argument in different type)
+/// [Decider]                     (with argument, return [Processor])
 ///
-/// transformer:
-/// [DoubleToTweenDouble]
-/// [SizeToOffset], [SizeToRadius], [SizeToPath], [CanvasSizeToPaint]
+/// [Predicator], [PredicatorComparison]
+/// [TernaryPredicator], [TernaryPredicatorComparison]
 ///
-/// call:
-/// [MapStringCall]
+/// a little generics:
+/// [CanvasProcessor], [AnimatingProcessor]
+/// [AnimatedListItemUpdateProcessor], [AnimatedListItemInsertProcessor]
 ///
-/// initializer:
-/// [AnimationControllerInitializer]
+/// [AnimationControllerInitializer], [FabExpandableSetupInitializer]
 ///
-/// listener (void call):
-/// [CanvasListener]
-/// [AnimationControllerListener], [AnimatedListItemUpdateListener], [AnimatedListItemInsertListener]
+/// [AnimationBuilder], [AnimationsBuilder]
+/// [SizedBoxBuilder], [MyAnimationBuilder]
+/// [LeaderBuilder], [FollowerBuilder]
 ///
-/// builder (the type that return a widget):
-/// [ValueBuilder], [CustomWidgetBuilder], [LeaderBuilder], [FollowerBuilder]
+/// [AnimatedListItemPlan]
 ///
-/// plan (the type that return a builder):
-/// [AnimatedItemPlan], [PathPlan]
+/// [OnLerp], [OnLerpPath], [OnMatrix4Animate]
 ///
-/// generator (with index):
-/// [VectorToVectorGenerator]
+/// [PaintFromCanvasSize]
+/// [PathFromRectSize], [PathFromRRectSize]
 ///
-/// validator:
+/// [DoubleToDoublePair]
 /// [TextFormFieldValidator]
-///
-/// on:
-/// [OnLerp], [OnMatrix4Animate], [OnMatrix4D3ValueAnimate],
-///
-/// mapper:
-/// [DoubleMapper], [DoubleDoubleMapper], [CoordinateMapper], [MationMapper], [AnimationsMapper], [MyTweenMapper]
-/// [CubicPointsMapper]
-///
-/// creator:
 /// [AnimatedListItemIndexCreator]
 ///
 ///
 
-final kTweenDoubleZero = TweenDouble.constant(0);
+// one generic type
+typedef Processor<T> = void Function(T value);
+typedef Conductor<T> = void Function(T a, T b);
+typedef Caller<T> = T Function();
+typedef Mapper<T> = T Function(T value);
+typedef Reducer<T> = T Function(T v1, T v2);
+typedef Generator<T> = T Function(int index);
+
+// two generic type
+typedef MapperWith<T, S> = T Function(T value, S helper);
+typedef ReducerWith<T, S> = T Function(T v1, T v2, S helper);
+typedef Translator<T, S> = S Function(T value);
+typedef Decider<T, S> = Processor<T> Function(S toggle);
 
 ///
-/// transformer
+/// predicator
 ///
-
-typedef DoubleToTweenDouble = TweenDouble Function(double double);
-typedef SizeToDouble = double Function(Size size);
-typedef SizeToOffset = Offset Function(Size size);
-typedef SizeToOffsetList = List<Offset> Function(Size size);
-typedef SizeToRadius = Radius Function(Size size);
-typedef SizeToPath = Path Function(Size size);
-typedef CanvasSizeToPaint = Paint Function(Canvas canvas, Size size);
+typedef Predicator<T> = bool Function(T value);
+typedef PredicatorComparison<T> = bool Function(T a, T? b);
+typedef TernaryPredicator<T> = bool? Function(T value);
+typedef TernaryPredicatorComparison<T> = bool? Function(T a, T? b);
 
 ///
-/// call
+/// processor
 ///
-
-typedef MapStringCall<T> = Map<String, T> Function();
-
-///
-/// initializer
-///
-
-typedef AnimationControllerInitializer = AnimationController Function(
-  TickerProvider tickerProvider,
-  Duration forward,
-  Duration reverse,
-);
-
-///
-/// listener
-///
-
-typedef TimerListener = void Function(Timer timer);
-
-typedef CanvasListener = void Function(Canvas canvas, Paint paint, Path path);
-
-typedef AnimationControllerListener = void Function(
+typedef CanvasProcessor = void Function(Canvas canvas, Paint paint, Path path);
+typedef AnimatingProcessor = void Function(
   AnimationController controller,
+  bool isForward,
 );
 
-typedef AnimatedListItemUpdateListener = void Function({
+typedef AnimatedListItemUpdateProcessor = void Function({
   required AnimatedItemBuilder? builder,
   required AnimatedListState listState,
   required List<AnimatedListItem> items,
   required int index,
 });
-typedef AnimatedListItemInsertListener = void Function({
+typedef AnimatedListItemInsertProcessor = void Function({
   required AnimatedItemBuilder builder,
   required AnimatedListState listState,
   required List<AnimatedListItem> items,
@@ -98,90 +84,76 @@ typedef AnimatedListItemInsertListener = void Function({
 });
 
 ///
+/// initializer
+///
+typedef AnimationControllerInitializer = AnimationController Function(
+  TickerProvider tickerProvider,
+  Duration forward,
+  Duration reverse,
+);
+
+typedef FabExpandableSetupInitializer = FabExpandableSetup Function({
+  required BuildContext context,
+  required Rect openIconRect,
+  required Alignment openIconAlignment,
+  required List<(Icon, VoidCallback)> icons,
+});
+
+///
 /// builder
 ///
-
-typedef CustomWidgetBuilder = Widget Function(Widget child);
+typedef AnimationBuilder<T> = Widget Function(
+  Animation<T> animation,
+  Widget child,
+);
+typedef AnimationsBuilder<T> = Widget Function(
+  Iterable<Animation<T>> animations,
+  Widget child,
+);
+typedef MationBuilder<T> = Widget Function(
+  BuildContext context,
+  MationBase<T> mation,
+);
 typedef LeaderBuilder = Leader Function(LayerLink link);
 typedef FollowerBuilder = Follower Function(LayerLink link);
-typedef AniBuilder = MyAnimation Function(BuildContext context);
 
 ///
-/// plan
+/// plan (the type that return a builder)
 ///
-
-typedef AnimatedItemPlan = AnimatedItemBuilder Function({
+typedef AnimatedListItemPlan = AnimatedItemBuilder Function({
   required List<AnimatedListItem> items,
   required AnimatedListState listState,
   required AnimatedListModification modification,
 });
 
-typedef PathPlan<T> = SizeToPath Function(T value);
-
 ///
-/// generator
+/// on (the type that may process in every tick)
 ///
-
-typedef VectorToVectorGenerator = Vector Function(Vector vector, int index);
-
-///
-/// validator
-///
-
-typedef TextFormFieldValidator = FormFieldValidator<String> Function(
-  String failedMessage,
-);
-
-///
-/// on
-///
-
-///
-/// [T] types:
+/// [OnMatrix4Animate]<[T]>:
 /// - [double] for 2d scaling, rotation
 /// - [Offset] for 2d translation
 /// - [Coordinate] for 3D scaling, translation, rotation
 ///
-typedef OnMatrix4Animate<T> = Matrix4 Function(Matrix4 matrix4, T value);
-
-typedef OnMatrix4D3ValueAnimate = double Function(
-  Dimension dimension,
-  double value,
-);
-
+///
 typedef OnLerp<T> = T Function(double t);
+typedef OnLerpPath<T> = Translator<Size, Path> Function(T value);
+typedef OnMatrix4Animate = Matrix4 Function(Matrix4 matrix4, Coordinate value);
 
-typedef OnOffsetListWithSize = List<Offset> Function(
-  List<Offset> points,
-  Size size,
+///
+/// from
+///
+typedef PaintFromCanvasSize = Paint Function(Canvas canvas, Size size);
+typedef PathFromRectSize = Path Function(Rect rect, Size size);
+typedef PathFromRRectSize = Path Function(RRect rect, Size size);
+
+///
+/// others
+///
+typedef DoubleToDoublePair = (double, double) Function(double value);
+
+typedef TextFormFieldValidator = FormFieldValidator<String> Function(
+  String failedMessage,
 );
-
-///
-/// mapper
-///
-
-typedef DoubleMapperNullable = double Function(double? value);
-typedef DoubleMapper = double Function(double value);
-typedef DoubleDoubleMapper = double Function(double v1, double v2);
-typedef OffsetMapper = double Function(Offset offset);
-
-typedef CoordinateMapper = Coordinate Function(Coordinate coordinate);
-
-typedef CurveMapper = Curve Function(Curve curve);
-typedef MationMapper<T> = Mation<T> Function(Mation<T> setup);
-
-typedef AnimationsMapper<T> = Iterable<Animation> Function(
-  Iterable<Animation> animations,
-);
-
-typedef MyTweenMapper<T> = MyTween<T> Function(MyTween<T> tween);
-typedef CubicPointsMapper = Map<Offset, List<Offset>> Function(
-  Map<Offset, List<Offset>> points,
-);
-
-///
-/// creator
-///
 
 typedef AnimatedListItemIndexCreator = int Function({
   required AnimatedItemBuilder? builder,

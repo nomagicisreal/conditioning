@@ -1,4 +1,5 @@
-// part of data;
+part of app;
+
 //
 // ///
 // /// [HumanKind]
@@ -76,4 +77,13 @@
 //     @Default(_emptyHrN) HumanRelatedNote relatedNote,
 //     @Default(_emptyHrE) HumanRelatedEvent relatedEvent,
 //   }) = _Person;
+// }
+
+
+// @immutable
+// abstract class MessagingUser {
+//   final String id;
+//   final String email;
+//   final String? name;
+//   const MessagingUser({required this.id, required this.email, this.name});
 // }

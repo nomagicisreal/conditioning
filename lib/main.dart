@@ -1,7 +1,6 @@
 import 'dart:ui' show PlatformDispatcher;
-
-import 'package:conditioning/app/service/service.dart' show MainService;
 import 'package:flutter/material.dart' show Size, runApp;
+import 'main_service.dart';
 
 late final PlatformDispatcher platformDispatcher;
 late final Iterable<Size> windowSizes;

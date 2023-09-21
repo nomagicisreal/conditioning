@@ -91,23 +91,12 @@ class HubStoreNotProvideError extends Error {}
 
 class HubStoreNoImplementationError extends Error {}
 
-class CustomError extends Error {
-  final Object? error;
-  @override
-  final StackTrace? stackTrace;
-
-  CustomError(this.error, {this.stackTrace});
-
-  @override
-  String toString() => error.toString();
-}
-
-class StreamError extends CustomError {
-  StreamError(super.error, {super.stackTrace});
+class StreamError extends UnimplementedError {
+  StreamError(super.message);
 }
 
 /// e for widget
-class ScreenNotFoundError extends CustomError {
+class ScreenNotFoundError extends UnimplementedError {
   ScreenNotFoundError(super.message);
 }
 
@@ -129,13 +118,12 @@ class CoordinateNotValidError extends CoordinateError {}
 
 class GraphConfigurationNoValidationError extends CoordinateError {}
 
-class MationPlanesNotAnimatableError extends CustomError {
+class MationPlanesNotAnimatableError extends UnimplementedError {
   MationPlanesNotAnimatableError()
       : super(
           "invalid to motivate 'PlanesAniController' without invoke 'motivate' method",
         );
 }
-
 
 ///
 ///

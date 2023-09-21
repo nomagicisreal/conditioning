@@ -1,4 +1,5 @@
-// part of data;
+part of app;
+
 //
 // ///
 // /// [ScriptKind]

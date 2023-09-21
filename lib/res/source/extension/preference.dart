@@ -120,7 +120,7 @@ enum MainColor {
   purple;
 
   static MainColor get randomMainColor {
-    final randomInt = Random().nextInt(6);
+    final randomInt = math.Random().nextInt(6);
     switch (randomInt) {
       case 0:
         return MainColor.red;
@@ -185,7 +185,7 @@ enum MainColor {
     }
   }
 
-  Color get primaryColor {
+  Color get colorPrimary {
     switch (this) {
       case MainColor.red:
         return KColorStyle1.redPrimary;

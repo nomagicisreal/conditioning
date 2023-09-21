@@ -4,157 +4,330 @@ part of source;
 
 ///
 /// this file contains:
-/// [kVoidCallback]
+/// [VoidCallbackExtension]
+/// [FOnLerp], [FOnMatrix4Animate]
 ///
-/// [KDoubleMapper], [FDoubleMapper], [KCurveMapper], [KCubicPointsMapper]
-/// [FStream]
-///
+/// [FWidgetBuilder]
+/// [FImageLoadingBuilder], [FImageErrorWidgetBuilder]
 /// [FListAnimatedItemBuilder], [FListAnimatedItemListener]
-///
-/// [FSizeToBoxConstraints]
-/// [FSizeToPath], [FSizeToPathRow], [FSizeToPathOperation]
-/// [FCanvasListener]
-///
 /// [FTextFormFieldValidator]
+/// [FFabExpandableSetupOrbit], [FFabExpandableSetupLine]
 ///
-/// [FImageLoadingBuilder]
+/// [FPathFromSize], [FPathFromSizeStyle], [FPathFromRectSize], [FPathFromRRectSize]
 ///
-/// [FInputDecorationBuilder]
-/// [FWidgetListBuilder]
+/// [FCanvasProcessor]
+/// [FCanvasSizeToPaint], [VPaintFill], [VPaintFillBlur], [VPaintStroke], [KMaskFilter]
 ///
+/// [FMyClipper], [FMyClipper], [FMyClipperMationTransform], [FMyClipperMationTransformRowTransform]...
+/// [FCustomPaint], [FMyPainter], [FMationPainter]
+///
+/// [FRRegularPolygon]
 ///
 
-void _voidCallback() {}
-const VoidCallback kVoidCallback = _voidCallback;
-
-extension KDoubleMapper on DoubleMapper {
-  static const DoubleMapper none = _none;
-  static const DoubleMapper sin_3_04 = _sin_3_04;
-
-  static double _none(double t) => t;
-  static double _sin_3_04(double value) => sin(value * 3) * 0.4;
+extension VoidCallbackExtension on VoidCallback {
+  Future<void> delayed(Duration duration) => Future.delayed(duration, this);
 }
 
-extension FDoubleMapper on DoubleMapper {
-  static DoubleMapper sinFromFactor({
-    required double timeFactor,
-    required double factor,
-  }) =>
-      (value) => sin(timeFactor * value) * factor;
+extension FOnLerp on OnLerp {
+  static OnLerp<T> constant<T>(T value) => (_) => value;
 
-  // return times of period of (0 ~ 1 ~ 0 ~ -1 ~ 0)
-  static DoubleMapper sinPeriodOf(double times) {
-    final tween = Tween(begin: 0.0, end: KRadian.angle_360 * times);
-    return (value) => sin(tween.transform(value));
-  }
+  static OnLerp<T> of<T>(T a, T b) => switch (a) {
+        Size() => _size(a, b as Size),
+        Rect() => _rect(a, b as Rect),
+        Color() => _color(a, b as Color),
+        Vector() => _vector(a, b as Vector),
+        Decoration() => _decoration(a, b as Decoration),
+        ShapeBorder() => _shapeBorder(a, b as ShapeBorder),
+        RelativeRect() => _relativeRect(a, b as RelativeRect),
+        AlignmentGeometry() => _alignmentGeometry(
+            a,
+            b as AlignmentGeometry,
+          ),
+        _ => Tween<T>(begin: a, end: b).transform,
+      } as OnLerp<T>;
 
-  static DoubleMapper operate(Operator operator, double value) =>
-      (v) => operator.operateDouble(v, value);
+  static OnLerp<Size> _size(Size a, Size b) => (t) => Size.lerp(a, b, t)!;
 
-  static DoubleMapper operateAngle(Operator operator, double angle) =>
-      (v) => FRadian.operateWithAngle(v, operator, angle);
+  static OnLerp<Rect> _rect(Rect a, Rect b) => (t) => Rect.lerp(a, b, t)!;
 
-  static DoubleMapper operateAngles(Map<Operator, double> operations) =>
-      (v) => FRadian.operateAllWithAngle(v, operations);
+  static OnLerp<Color> _color(Color a, Color b) => (t) => Color.lerp(a, b, t)!;
 
-}
+  static OnLerp<Vector> _vector(Vector a, Vector b) =>
+      (t) => Vector.lerp(a, b, t);
 
-extension KCurveMapper on CurveMapper {
-  static const CurveMapper flipped = _flipped;
-  static Curve _flipped(Curve curve) => curve.flipped;
-}
+  static OnLerp<RelativeRect> _relativeRect(RelativeRect a, RelativeRect b) =>
+      (t) => RelativeRect.lerp(a, b, t)!;
 
-extension KCubicPointsMapper on CubicPointsMapper {
-  static const CubicPointsMapper keep = _keep;
-  static const CubicPointsMapper add0_remove0 = _add0_remove0;
-  static const CubicPointsMapper add1_remove1 = _add1_remove1;
-  static const CubicPointsMapper add2_remove2 = _add2_remove2;
-
-  static Map<Offset, List<Offset>> _keep(Map<Offset, List<Offset>> points) =>
-      points;
-
-  static Map<Offset, List<Offset>> _add0_remove0(
-    Map<Offset, List<Offset>> points,
+  static OnLerp<AlignmentGeometry> _alignmentGeometry(
+    AlignmentGeometry a,
+    AlignmentGeometry b,
   ) =>
-      points.map((point, cubicPoints) => MapEntry(
-            point,
-            cubicPoints
-              ..add(cubicPoints[0])
-              ..removeAt(0),
-          ));
+      (t) => AlignmentGeometry.lerp(a, b, t)!;
 
-  static Map<Offset, List<Offset>> _add1_remove1(
-    Map<Offset, List<Offset>> points,
-  ) =>
-      points.map((point, cubicPoints) => MapEntry(
-            point,
-            cubicPoints
-              ..add(cubicPoints[1])
-              ..removeAt(1),
-          ));
+  ///
+  ///
+  /// TODO: lerp between difference [ShapeBorder], migrate with [RRegularPolygon]
+  /// before then, it's better to create borders in the same type.
+  ///
+  /// See Also
+  ///   * [BetweenPath.fromShapeBorder] ...
+  ///   * [FPathFromSize.fromShapeBorder]
+  ///   * [FOnLerpPath.shapeOuterLtr] ...
+  ///   * [KBoxBorder] ...
+  ///
+  ///
+  static OnLerp<ShapeBorder> _shapeBorder(ShapeBorder a, ShapeBorder b) =>
+      switch (a) {
+        BoxBorder() => switch (b) {
+            BoxBorder() => (t) => BoxBorder.lerp(a, b, t)!,
+            _ => throw UnimplementedError(),
+          },
+        InputBorder() => switch (b) {
+            InputBorder() => (t) => ShapeBorder.lerp(a, b, t)!,
+            _ => throw UnimplementedError(),
+          },
+        OutlinedBorder() => switch (b) {
+            OutlinedBorder() => (t) => OutlinedBorder.lerp(a, b, t)!,
+            _ => throw UnimplementedError(),
+          },
+        _ => throw UnimplementedError(),
+      };
 
-  static Map<Offset, List<Offset>> _add2_remove2(
-    Map<Offset, List<Offset>> points,
-  ) =>
-      points.map((point, cubicPoints) => MapEntry(
-            point,
-            cubicPoints
-              ..add(cubicPoints[2])
-              ..removeAt(2),
-          ));
+  static OnLerp<Decoration> _decoration(Decoration a, Decoration b) =>
+      switch (a) {
+        BoxDecoration() => b is BoxDecoration && a.shape == b.shape
+            ? (t) => BoxDecoration.lerp(a, b, t)!
+            : throw UnimplementedError('BoxShape should not be interpolated'),
+        ShapeDecoration() => switch (b) {
+            ShapeDecoration() => a.shape == b.shape
+                ? (t) => ShapeDecoration.lerp(a, b, t)!
+                : switch (a.shape) {
+                    CircleBorder() || RoundedRectangleBorder() => switch (
+                          b.shape) {
+                        CircleBorder() || RoundedRectangleBorder() => (t) =>
+                            Decoration.lerp(a, b, t)!,
+                        _ => throw UnimplementedError(
+                            "'$a shouldn't be interpolated to $b'",
+                          ),
+                      },
+                    _ => throw UnimplementedError(
+                        "'$a shouldn't be interpolated to $b'",
+                      ),
+                  },
+            _ => throw UnimplementedError(),
+          },
+        _ => throw UnimplementedError(),
+      };
 }
 
-extension FStream on Stream {
-  static Stream<int> intOf({
-    int start = 1,
-    int end = 10,
-    Duration interval = KDuration.second1,
-    bool startWithoutDelay = true,
-  }) async* {
-    final yieldFun = startWithoutDelay
-        ? (int value) async => await Future.delayed(interval).then((_) => value)
-        : (int value) async => value == start
-            ? value
-            : await Future.delayed(interval).then((_) => value);
+extension FOnLerpPath on OnLerpPath {
+  static const shapeOuterLtr = _shapeOuterLtr;
+  static const shapeOuterRtl = _shapeOuterRtl;
+  static const shapeInnerLtr = _shapeInnerLtr;
+  static const shapeInnerRtl = _shapeInnerRtl;
 
-    if (end >= start) {
-      for (var value = start; value <= end; value++) {
-        yield await yieldFun(value);
-      }
-    } else {
-      for (var value = start; value >= end; value--) {
-        yield await yieldFun(value);
-      }
-    }
-  }
+  static Translator<Size, Path> _shapeOuterLtr(ShapeBorder shape) =>
+      FPathFromSize.fromShapeBorder(
+        shape,
+        textDirection: TextDirection.ltr,
+        isOuterPath: true,
+      );
 
-  static Stream<double> doubleOf(
-    int elementCount, {
-    Duration interval = KDuration.second1,
-  }) async* {
-    for (int i = 0; i < elementCount; i++) {
-      yield i.toDouble();
-      await Future.delayed(interval);
-    }
-  }
+  static Translator<Size, Path> _shapeOuterRtl(ShapeBorder shape) =>
+      FPathFromSize.fromShapeBorder(
+        shape,
+        textDirection: TextDirection.rtl,
+        isOuterPath: true,
+      );
 
-  static Stream<FollowerBuilder> followerOf(
-    int elementCount, {
-    Duration interval = KDuration.second2,
-    Offset begin = Offset.zero,
-    Offset distance = KCoordinate.cube_10,
-  }) async* {
-    Offset offset = begin;
-    for (int i = 0; i < elementCount; i++, offset += distance) {
-      yield (link) => Follower(
-            link: link,
-            leaderOffset: offset,
-            anchorOnLeader: Alignment.center,
-            child: VContainer.squareGreen_300,
+  static Translator<Size, Path> _shapeInnerLtr(ShapeBorder shape) =>
+      FPathFromSize.fromShapeBorder(
+        shape,
+        textDirection: TextDirection.ltr,
+        isOuterPath: false,
+      );
+
+  static Translator<Size, Path> _shapeInnerRtl(ShapeBorder shape) =>
+      FPathFromSize.fromShapeBorder(
+        shape,
+        textDirection: TextDirection.rtl,
+        isOuterPath: false,
+      );
+}
+
+///
+///
+///
+/// onMatrix4Animate
+///
+///
+///
+
+extension FOnMatrix4Animate on OnMatrix4Animate {
+  static const OnMatrix4Animate scaling = _scaling;
+  static const OnMatrix4Animate translating = _translating;
+  static const OnMatrix4Animate rotating = _rotating;
+
+  static Matrix4 _scaling(Matrix4 matrix4, Coordinate value) =>
+      matrix4.scaledCoordinate(value);
+
+  static Matrix4 _translating(Matrix4 matrix4, Coordinate value) =>
+      Matrix4Extension.identityPerspectiveOf(matrix4)
+        ..translateCoordinate(value);
+
+  static Matrix4 _rotating(Matrix4 matrix4, Coordinate value) => matrix4
+    ..setRotation((Matrix4.identity()..rotateCoordinate(value)).getRotation());
+
+  ///
+  /// with mapper
+  ///
+  static OnMatrix4Animate scaleMapping(Mapper<Coordinate> mapper) =>
+      (matrix4, value) => matrix4.scaledCoordinate(mapper(value));
+
+  static OnMatrix4Animate translateMapping(Mapper<Coordinate> mapper) =>
+      (matrix4, value) => Matrix4Extension.identityPerspectiveOf(matrix4)
+        ..translateCoordinate(mapper(value));
+
+  static OnMatrix4Animate rotateMapping(Mapper<Coordinate> mapper) =>
+      (matrix4, value) => matrix4
+        ..setRotation((Matrix4.identity()..rotateCoordinate(mapper(value)))
+            .getRotation());
+
+  ///
+  /// with fixed value
+  ///
+  static OnMatrix4Animate fixedScaling(Coordinate fixed) =>
+      (matrix4, value) => matrix4.scaledCoordinate(value + fixed);
+
+  static OnMatrix4Animate fixedTranslating(Coordinate fixed) =>
+      (matrix4, value) => Matrix4Extension.identityPerspectiveOf(matrix4)
+        ..translateCoordinate(value + fixed);
+
+  static OnMatrix4Animate fixedRotating(Coordinate fixed) =>
+      (matrix4, value) => matrix4
+        ..setRotation((Matrix4.identity()..rotateCoordinate(fixed + value))
+            .getRotation());
+}
+
+///
+/// widget builder
+///
+
+extension FWidgetBuilder on Widget {
+  static WidgetBuilder of(Widget child) => (context) => child;
+
+  static Widget progressing(BuildContext _) => KProgressIndicator.circular;
+
+  static List<Widget> sandwich({
+    bool isInRow = true,
+    required int breadCount,
+    required Generator<Widget> bread,
+    required Generator<Widget> meat,
+  }) {
+    List<Widget> children(int index) => [
+          bread(index),
+          if (index < breadCount - 1) meat(index),
+        ];
+
+    return isInRow
+        ? List<Row>.generate(
+            breadCount,
+            (index) => Row(children: children(index)),
+          )
+        : List<Column>.generate(
+            breadCount,
+            (index) => Column(children: children(index)),
           );
-      await Future.delayed(interval);
-    }
   }
+}
+
+extension FImageLoadingBuilder on ImageLoadingBuilder {
+  static Widget style1(
+    BuildContext context,
+    Widget child,
+    ImageChunkEvent? loadingProgress,
+  ) =>
+      loadingProgress == null
+          ? child
+          : Center(
+              child: CircularProgressIndicator(
+                color: Colors.blueGrey,
+                value: loadingProgress.expectedTotalBytes != null &&
+                        loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+
+  static Widget style2(
+    BuildContext context,
+    Widget child,
+    ImageChunkEvent? loadingProgress,
+  ) =>
+      loadingProgress == null
+          ? child
+          : SizedBox(
+              width: 90,
+              height: 90,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Colors.grey,
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              ),
+            );
+
+  static Widget style3(
+    BuildContext ctx,
+    Widget child,
+    ImageChunkEvent? loadingProgress,
+  ) =>
+      loadingProgress == null
+          ? child
+          : Center(
+              child: CircularProgressIndicator(
+                color: Colors.blueGrey,
+                value: loadingProgress.expectedTotalBytes != null &&
+                        loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+
+  static Widget style4(
+    BuildContext context,
+    Widget child,
+    ImageChunkEvent? loadingProgress,
+  ) =>
+      loadingProgress == null
+          ? child
+          : SizedBox(
+              width: 200,
+              height: 200,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Colors.brown,
+                  value: loadingProgress.expectedTotalBytes != null &&
+                          loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              ),
+            );
+}
+
+extension FImageErrorWidgetBuilder on ImageErrorWidgetBuilder {
+  static Widget accountStyle2(BuildContext c, Object o, StackTrace? s) =>
+      KIconMaterial.accountCircleStyle2;
+
+  static Widget errorStyle1(BuildContext c, Object o, StackTrace? s) =>
+      const SizedBox(height: 200, width: 200, child: Icon(Icons.error));
 }
 
 extension FListAnimatedItemBuilder on AnimatedItemBuilder {
@@ -209,7 +382,7 @@ extension FListAnimatedItemBuilder on AnimatedItemBuilder {
           padding: KEdgeInsets.symV_4,
           child: Container(
             height: 48,
-            decoration: KShapeDecoration.stadiumGrey,
+            decoration: FDecorationShape.stadiumGrey,
             clipBehavior: Clip.antiAlias,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -229,7 +402,7 @@ extension FListAnimatedItemBuilder on AnimatedItemBuilder {
                     index: index,
                   ),
                   color: KColor.constant_200,
-                  icon: KIcon.cancel_24,
+                  icon: KIconMaterial.cancel_24,
                   splashRadius: 20.0,
                 ),
               ],
@@ -303,62 +476,100 @@ extension FListAnimatedItemListener on AnimatedItemBuilder {
       throw UnimplementedError();
 }
 
-extension FSizeToBoxConstraints on Size {
-  static BoxConstraints minWH100_maxWH08Of(Size size) => BoxConstraints(
-        minWidth: 100,
-        minHeight: 100,
-        maxHeight: size.height * 0.8,
-        maxWidth: size.width * 0.8,
+extension FTextFormFieldValidator on TextFormFieldValidator {
+  static FormFieldValidator<String> validateNullOrEmpty(
+    String validationFailedMessage,
+  ) =>
+      (value) =>
+          value == null || value.isEmpty ? validationFailedMessage : null;
+}
+
+extension FFabExpandableSetupOrbit on FabExpandableSetupInitializer {
+  static const clockwise_2 = _clockwise_2;
+  static const counterClockwise_2 = _counterClockwise_2;
+
+  static FabExpandableSetup _clockwise_2({
+    required BuildContext context,
+    required Rect openIconRect,
+    required Alignment openIconAlignment,
+    required List<(Icon, VoidCallback)> icons,
+  }) =>
+      FabExpandableSetup.orbitOnOpenIcon(
+        context: context,
+        openIconRect: openIconRect,
+        direction: openIconAlignment.directionOfSideSpace(
+          true,
+          icons.length,
+        ),
+        icons: icons,
       );
 
-// ...
+  static FabExpandableSetup _counterClockwise_2({
+    required BuildContext context,
+    required Rect openIconRect,
+    required Alignment openIconAlignment,
+    required List<(Icon, VoidCallback)> icons,
+  }) =>
+      FabExpandableSetup.orbitOnOpenIcon(
+        context: context,
+        openIconRect: openIconRect,
+        direction: openIconAlignment.directionOfSideSpace(false, icons.length),
+        icons: icons,
+      );
+}
+
+extension FFabExpandableSetupLine on FabExpandableSetupInitializer {
+  static FabExpandableSetupInitializer line1d2Of(
+    Direction2DIn8 direction,
+  ) =>
+      ({
+        required BuildContext context,
+        required Rect openIconRect,
+        required Alignment openIconAlignment,
+        required List<(Icon, VoidCallback)> icons,
+      }) =>
+          FabExpandableSetup.line(
+            context: context,
+            openIconRect: openIconRect,
+            direction: direction,
+            icons: icons,
+          );
 }
 
 ///
-/// [line]
+/// [addOval], [addRect], [addRRect] ...
+///
+///
 /// [lineAll]
 /// [bezierQuadratic]
 /// [bezierCubic]
-/// [circle]
-/// [circleHalf]
-/// [rect]
-/// [rRect]
 /// [polygon]
 /// [polygonCubicCorner]
 /// [trapezium]
-/// [pencil]
+/// ...
 ///
-extension FSizeToPath on SizeToPath {
-  static SizeToPath _invertFromSize({
-    bool close = true,
-    required bool invertFromSize,
-    required SizeToPath sizeToPath,
-  }) =>
-      close
-          ? invertFromSize
-              ? (size) => sizeToPath(size)
-                ..addRect(Offset.zero & size)
-                ..close()
-              : (size) => sizeToPath(size)..close()
-          : invertFromSize
-              ? (size) => sizeToPath(size)..addRect(Offset.zero & size)
-              : (size) => sizeToPath(size);
+/// [_invertFromSize]
+/// [fromShapeBorder]
+/// [circleHalfOf]
+/// [_circleHalf]
+/// [penpointFlat]
+/// ...
+///
+extension FPathFromSize on Translator<Size, Path> {
+  static Translator<Size, Path> addOval(Rect rect) =>
+      (_) => Path()..addOval(rect);
+
+  static Translator<Size, Path> addRect(Rect rect) =>
+      (_) => Path()..addRect(rect);
+
+  static Translator<Size, Path> addRRect(RRect rRect) =>
+      (_) => Path()..addRRect(rRect);
 
   ///
-  /// line
+  /// line, bezier
   ///
 
-  static SizeToPath line({
-    required Offset from,
-    required Offset to,
-    PathFillType pathFillType = PathFillType.nonZero,
-  }) =>
-      (_) => Path()
-        ..connect(from, to)
-        ..fillType = pathFillType
-        ..close();
-
-  static SizeToPath lineAll({
+  static Translator<Size, Path> lineAll({
     Offset from = Offset.zero,
     required Iterable<Offset> points,
     PathFillType pathFillType = PathFillType.nonZero,
@@ -370,11 +581,7 @@ extension FSizeToPath on SizeToPath {
             ..fillType = pathFillType
             ..close();
 
-  ///
-  /// bezier
-  ///
-
-  static SizeToPath bezierQuadratic({
+  static Translator<Size, Path> bezierQuadratic({
     bool invertFromSize = false,
     required Offset controlPoint,
     required Offset endPoint,
@@ -385,7 +592,7 @@ extension FSizeToPath on SizeToPath {
             Path()..quadraticBezierToPoint(controlPoint, endPoint),
       );
 
-  static SizeToPath bezierCubic({
+  static Translator<Size, Path> bezierCubic({
     bool invertFromSize = false,
     required Offset c1,
     required Offset c2,
@@ -396,39 +603,144 @@ extension FSizeToPath on SizeToPath {
         sizeToPath: (_) => Path()..cubicToPoint(c1, c2, endPoint),
       );
 
-  ///
-  /// oval
-  ///
-
-  static SizeToPath circle({
+  static Translator<Size, Path> trapezium({
     bool invertFromSize = false,
-    required Offset center,
-    required double radius,
+    Translator<Size, double>? height,
+    required DoubleToDoublePair topSide,
+    required DoubleToDoublePair bottomSide,
   }) =>
       _invertFromSize(
         invertFromSize: invertFromSize,
-        sizeToPath: (_) =>
-            Path()..addOval(Rect.fromCircle(center: center, radius: radius)),
+        sizeToPath: (size) {
+          final top = topSide(size.width);
+          final bottom = bottomSide(size.width);
+          final h = height?.call(size) ?? size.height;
+
+          return Path()
+            ..moveTo(top.$1, 0.0)
+            ..lineTo(top.$2, 0.0)
+            ..lineTo(bottom.$1, h)
+            ..lineTo(bottom.$2, h)
+            ..lineTo(top.$1, 0.0);
+        },
       );
 
-  static SizeToPath circleFromSize({
+  ///
+  /// polygon
+  ///
+
+  /// to create [corners], see [RegularPolygon.cornersOf]
+  static Translator<Size, Path> polygon(
+    List<Offset> corners, {
     bool invertFromSize = false,
-    required SizeToOffset center,
-    required SizeToDouble radius,
   }) =>
       _invertFromSize(
         invertFromSize: invertFromSize,
-        sizeToPath: (size) => Path()
-          ..addOval(Rect.fromCircle(
-            center: center(size),
-            radius: radius(size),
-          )),
+        sizeToPath: (_) => Path()..addPolygon(corners, false),
       );
 
-  static SizeToPath circleHalf({
+  ///
+  /// [cubicPoints] should be the cubic points related to polygon corners in clockwise or counterclockwise sequence
+  /// every element list of [cubicPoints] will be treated as [beginPoint, controlPointA, controlPointB, endPoint]
+  ///
+  /// see [RRegularPolygon.cubicPoints] and its subclasses for [cubicPoints] creation
+  ///
+  static Translator<Size, Path> polygonCubicCorner(
+    Iterable<List<Offset>> cubicPoints, {
+    bool invertFromSize = false,
+    double scale = 1,
+  }) =>
+      _invertFromSize(
+        invertFromSize: invertFromSize,
+        sizeToPath: (_) => cubicPoints
+            .map((points) => scale == 1
+                ? points
+                : points.map((p) => p * scale).toList(growable: false))
+            .foldWithIndex(
+              Path(),
+              (path, points, index) => path
+                ..moveOrLineToPoint(index == 0, points[0])
+                ..cubicToPointsList(points.sublist(1)),
+            ),
+      );
+
+  static Translator<Size, Path> polygonCubicCornerFromSize(
+    Iterable<List<Offset>> cubicPoints, {
+    MapperWith<List<Offset>, Size> transform =
+        FOffsetListWithSize.transformPointsToSizeCenter,
+    bool invertFromSize = false,
+    double scale = 1,
+  }) =>
+      _invertFromSize(
+        invertFromSize: invertFromSize,
+        sizeToPath: (size) => cubicPoints
+            .map((points) => scale == 1
+                ? points
+                : points.map((p) => p * scale).toList(growable: false))
+            .map((points) => transform(points, size))
+            .foldWithIndex(
+              Path(),
+              (path, points, index) => path
+                ..moveOrLineToPoint(index == 0, points[0])
+                ..cubicToPointsList(points.sublist(1)),
+            ),
+      );
+
+  ///
+  ///
+  ///
+  ///
+  ///
+  ///
+  ///
+  ///
+  ///
+  static Translator<Size, Path> _invertFromSize({
+    bool close = true,
+    required bool invertFromSize,
+    required Translator<Size, Path> sizeToPath,
+  }) =>
+      close
+          ? invertFromSize
+              ? (size) => sizeToPath(size)
+                ..addRect(Offset.zero & size)
+                ..close()
+              : (size) => sizeToPath(size)..close()
+          : invertFromSize
+              ? (size) => sizeToPath(size)..addRect(Offset.zero & size)
+              : (size) => sizeToPath(size);
+
+  static Translator<Size, Path> fromShapeBorder(
+    ShapeBorder shape, {
+    TextDirection? textDirection,
+    bool isOuterPath = true,
+  }) =>
+      isOuterPath
+          ? (size) => shape.getOuterPath(
+                Offset.zero & size,
+                textDirection: textDirection,
+              )
+          : (size) => shape.getInnerPath(
+                Offset.zero & size,
+                textDirection: textDirection,
+              );
+
+  static Translator<Size, Path> circleHalfOf(bool isRight) => isRight
+      ? FPathFromSize._circleHalf(
+          arcStartOf: (size) => Offset.zero,
+          arcEndOf: (size) => Offset(0, size.height),
+          clockwise: true,
+        )
+      : FPathFromSize._circleHalf(
+          arcStartOf: (size) => Offset(size.width, 0),
+          arcEndOf: (size) => size.toOffset,
+          clockwise: false,
+        );
+
+  static Translator<Size, Path> _circleHalf({
     bool clockwise = true,
-    required SizeToOffset arcStartOf,
-    required SizeToOffset arcEndOf,
+    required Translator<Size, Offset> arcStartOf,
+    required Translator<Size, Offset> arcEndOf,
   }) =>
       (size) {
         final start = arcStartOf(size);
@@ -443,378 +755,749 @@ extension FSizeToPath on SizeToPath {
           ..close();
       };
 
-  /// rect
-  ///
-  /// A
-  ///  --------
-  ///  |      |       [cornerA] = A
-  ///  |      |       [cornerB] = B
-  ///  --------
-  ///          B
-  ///
-  static SizeToPath rect({
-    bool invertFromSize = false,
-    required Offset cornerA,
-    required Offset cornerB,
-  }) =>
-      _invertFromSize(
-        invertFromSize: invertFromSize,
-        sizeToPath: (_) => Path()..addRect(Rect.fromPoints(cornerA, cornerB)),
-      );
-
-  static SizeToPath rRect({
-    bool invertFromSize = false,
-    Radius radius = KRadius.circular10,
-    required Offset cornerA,
-    required Offset cornerB,
-  }) =>
-      _invertFromSize(
-        invertFromSize: invertFromSize,
-        sizeToPath: (_) => Path()
-          ..addRRect(RRect.fromRectAndRadius(
-            Rect.fromPoints(cornerA, cornerB),
-            radius,
-          )),
-      );
-
-  ///
-  /// polygon
-  ///
-
-  ///
-  /// see [RegularPolygon.cornersOf] for [corners] creation
-  ///
-  static SizeToPath polygon(
-    List<Offset> corners, {
-    bool invertFromSize = false,
-  }) =>
-      _invertFromSize(
-        invertFromSize: invertFromSize,
-        sizeToPath: (_) => Path()..addPolygon(corners, false),
-      );
-
-  static SizeToPath polygonFromSize(
-    SizeToOffsetList corners, {
-    bool invertFromSize = false,
-  }) =>
-      _invertFromSize(
-        invertFromSize: invertFromSize,
-        sizeToPath: (size) => Path()..addPolygon(corners(size), false),
-      );
-
-  ///
-  /// [cubicPoints] should be the cubic points related to polygon corners in clockwise or counterclockwise sequence
-  /// every element list of [cubicPoints] will be treated as [beginPoint, controlPointA, controlPointB, endPoint]
-  ///
-  /// see [RRegularPolygon.cubicPoints] and its subclasses for [cubicPoints] creation
-  ///
-  static SizeToPath polygonCubicCorner(
-    Iterable<List<Offset>> cubicPoints, {
-    OnOffsetListWithSize? transform,
-    bool invertFromSize = false,
-    double scale = 1,
-  }) =>
-      _invertFromSize(
-        invertFromSize: invertFromSize,
-        sizeToPath: transform == null
-            ? (_) => cubicPoints
-                .map((points) => scale == 1
-                    ? points
-                    : points.map((p) => p * scale).toList(growable: false))
-                .foldWithIndex(
-                  Path(),
-                  (path, points, index) => path
-                    ..moveOrLineToPoint(index == 0, points[0])
-                    ..cubicToPointsList(points.sublist(1)),
-                )
-            : (size) => cubicPoints
-                .map((points) => scale == 1
-                    ? points
-                    : points.map((p) => p * scale).toList(growable: false))
-
-                /// compared with transform == null, only this line is been added.
-                .map((points) => transform(points, size))
-                .foldWithIndex(
-                  Path(),
-                  (path, points, index) => path
-                    ..moveOrLineToPoint(index == 0, points[0])
-                    ..cubicToPointsList(points.sublist(1)),
-                ),
-      );
-
-  /// trapezium
-  ///
-  /// [parallelFactor] = AB / CD
-  ///
-  /// A   B
-  ///  ---
-  /// /   \
-  /// -----
-  /// C    D
-  ///
-  static SizeToPath trapezium({
-    bool invertFromSize = false,
-    required double parallelFactor,
-  }) {
-    assert(parallelFactor < 1, 'invalid factor');
-
-    return _invertFromSize(
-      invertFromSize: invertFromSize,
-      sizeToPath: (size) {
-        final width = size.width;
-        final height = size.height;
-        final padding = width * ((1 - parallelFactor) / 2);
-
-        return Path()
-          ..moveTo(padding, 0.0)
-          ..lineTo(width - padding, 0.0)
-          ..lineTo(width, height)
-          ..lineTo(0.0, height)
-          ..lineTo(padding, 0.0);
-      },
-    );
-  }
-
   /// pencil
   ///
-  /// [verticalFactor] description see [trapezium]
-  ///
   /// -----
   /// |   |
-  /// |   |   b = (the length of '|')
+  /// |   |   <----[penBodyLength]
   /// |   |
-  /// \   /   a = (the length of '\' and '/')
-  ///  ---
+  /// \   /
+  ///  ---   <---- [flatWidth]
   ///
-  /// [horizontalFactor] = a / b
   ///
-  static SizeToPath pencil({
+  static Translator<Size, Path> penpointFlat({
     bool invertFromSize = false,
-    required double verticalFactor,
-    required double horizontalFactor,
-  }) {
-    assert(verticalFactor < 1, 'invalid pencil');
+    required Translator<Size, double> flatWidth,
+    required Translator<Size, double> penBodyLength,
+  }) =>
+      FPathFromSize._invertFromSize(
+        invertFromSize: invertFromSize,
+        sizeToPath: (size) {
+          final width = size.width;
+          final height = size.height;
+          final flatLength = flatWidth(size);
+          final penBody = penBodyLength(size);
 
-    return _invertFromSize(
-      invertFromSize: invertFromSize,
-      sizeToPath: (size) {
-        final width = size.width;
-        final height = size.height;
-        final pencilTailPadding = width * ((1 - verticalFactor) / 2);
-        final pencilBody = height * (1 / (1 + horizontalFactor));
+          return Path()
+            ..lineTo(width, 0.0)
+            ..lineTo(width, penBody)
+            ..lineTo((width + flatLength) / 2, height)
+            ..lineTo((width - flatLength) / 2, height)
+            ..lineTo(0.0, penBody)
+            ..lineTo(0.0, 0.0)
+            ..close();
+        },
+      );
+}
 
-        return Path()
-          ..lineTo(width, 0.0)
-          ..lineTo(width, pencilBody)
-          ..lineTo(width - pencilTailPadding, height)
-          ..lineTo(pencilTailPadding, height)
-          ..lineTo(0.0, pencilBody)
-          ..lineTo(0.0, 0.0)
-          ..close();
-      },
-    );
-  }
+extension FPathFromRectSize on PathFromRectSize {
+  static const PathFromRectSize addOval = _addOval;
+  static const PathFromRectSize addRect = _addRect;
+
+  static Path _addOval(Rect rect, Size size) =>
+      FPathFromSize.addOval(rect)(size);
+
+  static Path _addRect(Rect rect, Size size) =>
+      FPathFromSize.addRect(rect)(size);
+}
+
+extension FPathFromRRectSize on PathFromRRectSize {
+  static const PathFromRRectSize addRRect = _addRRect;
+
+  static Path _addRRect(RRect rect, Size size) =>
+      FPathFromSize.addRRect(rect)(size);
 }
 
 ///
-/// [circleLeftRight]
 ///
-extension FSizeToPathRow on SizeToPath {
-  static SizeToPath circleLeftRight({
-    required bool isRight,
-  }) =>
-      isRight
-          ? FSizeToPath.circleHalf(
-              arcStartOf: (size) => Offset.zero,
-              arcEndOf: (size) => Offset(0, size.height),
-              clockwise: true,
-            )
-          : FSizeToPath.circleHalf(
-              arcStartOf: (size) => Offset(size.width, 0),
-              arcEndOf: (size) => size.toOffset,
-              clockwise: false,
-            );
-}
+/// canvas, paint
+///
+///
 
-extension FSizeToPathOperation on SizeToPath {
-  static SizeToPath operate(
-    PathOperation operation,
-    SizeToPath spA,
-    SizeToPath spB,
-  ) =>
-      (size) => Path.combine(operation, spA(size), spB(size));
-
-  static SizeToPath operateAll({
-    required PathOperation operation,
-    required Iterable<SizeToPath> sps,
-  }) =>
-      sps.reduce((sp, spNext) => operate(operation, sp, spNext));
-}
-
-extension FCanvasListener on CanvasListener {
+extension FCanvasProcessor on CanvasProcessor {
   static const drawPathWithPaint = _drawPathWithPaint;
 
   static void _drawPathWithPaint(Canvas canvas, Paint paint, Path path) =>
       canvas.drawPath(path, paint);
 }
 
-extension FTextFormFieldValidator on TextFormFieldValidator {
-  static FormFieldValidator<String> validateNullOrEmpty(
-    String validationFailedMessage,
-  ) =>
-      (value) =>
-          value == null || value.isEmpty ? validationFailedMessage : null;
+extension FCanvasSizeToPaint on PaintFromCanvasSize {
+  static const PaintFromCanvasSize whiteFill = _whiteFill;
+  static const PaintFromCanvasSize redFill = _redFill;
+
+  static Paint _whiteFill(Canvas canvas, Size size) => VPaintFill.white;
+
+  static Paint _redFill(Canvas canvas, Size size) => VPaintFill.red;
+
+  static PaintFromCanvasSize of(Paint paint) => (_, __) => paint;
 }
 
-extension FWidgetListBuilder on Widget {
-  static List<Widget> sandwich({
-    bool isRow = true,
-    required int boundary,
-    required BoxConstraints breadConstraints,
-    required BoxConstraints meatConstraints,
-    required Widget Function(int index) bread,
-    required Widget Function(int indexOfPreviousBread) meat,
-  }) {
-    List<Widget> children(int index) => [
-          Container(constraints: breadConstraints, child: bread(index)),
-          index != boundary
-              ? Container(constraints: meatConstraints, child: meat(index))
-              : const SizedBox()
-        ];
+extension VPaintFill on Paint {
+  static Paint get _fill => Paint()..style = PaintingStyle.fill;
 
-    return isRow
-        ? List<Row>.generate(
-            boundary,
-            (index) => Row(
-              children: children(index),
-            ),
-          )
-        : List<Column>.generate(
-            boundary,
-            (index) => Column(
-              children: children(index),
-            ),
-          );
-  }
+  static Paint get black => _fill..color = Colors.black;
+
+  static Paint get white => _fill..color = Colors.white;
+
+  static Paint get red => _fill..color = Colors.red;
+
+  static Paint get orange => _fill..color = Colors.orange;
+
+  static Paint get yellow => _fill..color = Colors.yellow;
+
+  static Paint get green => _fill..color = Colors.green;
+
+  static Paint get blue => _fill..color = Colors.blue;
+
+  static Paint get blueAccent => _fill..color = Colors.blueAccent;
+
+  static Paint get purple => _fill..color = Colors.purple;
 }
 
-extension FInputDecorationBuilder on InputDecoration {
-  static InputDecoration rowLabelIconText({
-    InputBorder? border,
-    required Icon icon,
-    required String text,
+extension VPaintFillBlur on Paint {
+  static Paint get white_normal_05 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_05;
+
+  static Paint get white_normal_1 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_1;
+
+  static Paint get white_normal_2 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_2;
+
+  static Paint get white_normal_3 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_3;
+
+  static Paint get white_normal_4 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_4;
+
+  static Paint get white_normal_5 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_5;
+
+  static Paint get white_normal_6 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_6;
+
+  static Paint get white_normal_7 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_7;
+
+  static Paint get white_normal_8 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_8;
+
+  static Paint get white_normal_9 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_9;
+
+  static Paint get white_normal_10 =>
+      VPaintFill.white..maskFilter = KMaskFilter.normal_10;
+}
+
+extension FPaintFill on Paint {
+  static Paint of(Color color) => VPaintFill._fill..color = color;
+}
+
+extension VPaintStroke on Paint {
+  static Paint get _stroke => Paint()..style = PaintingStyle.stroke;
+
+  /// stroke
+
+  static Paint get _stroke_1 => _stroke..strokeWidth = 1;
+
+  static Paint get _stroke_2 => _stroke..strokeWidth = 2;
+
+  static Paint get _stroke_3 => _stroke..strokeWidth = 3;
+
+  static Paint get _stroke_4 => _stroke..strokeWidth = 4;
+
+  static Paint get _stroke_5 => _stroke..strokeWidth = 5;
+
+  /// cap
+
+  static Paint get _stroke_1_capRound => _stroke_1..strokeCap = StrokeCap.round;
+
+  static Paint get _stroke_1_capSquare =>
+      _stroke_1..strokeCap = StrokeCap.square;
+
+  static Paint get _stroke_1_capButt => _stroke_1..strokeCap = StrokeCap.butt;
+
+  static Paint get _stroke_2_capRound => _stroke_2..strokeCap = StrokeCap.round;
+
+  static Paint get _stroke_2_capSquare =>
+      _stroke_2..strokeCap = StrokeCap.square;
+
+  static Paint get _stroke_2_capButt => _stroke_2..strokeCap = StrokeCap.butt;
+
+  static Paint get _stroke_3_capRound => _stroke_3..strokeCap = StrokeCap.round;
+
+  static Paint get _stroke_3_capSquare =>
+      _stroke_3..strokeCap = StrokeCap.square;
+
+  static Paint get _stroke_3_capButt => _stroke_3..strokeCap = StrokeCap.butt;
+
+  static Paint get _stroke_4_capRound => _stroke_4..strokeCap = StrokeCap.round;
+
+  static Paint get _stroke_4_capSquare =>
+      _stroke_4..strokeCap = StrokeCap.square;
+
+  static Paint get _stroke_4_capButt => _stroke_4..strokeCap = StrokeCap.butt;
+
+  static Paint get _stroke_5_capRound => _stroke_5..strokeCap = StrokeCap.round;
+
+  static Paint get _stroke_5_capSquare =>
+      _stroke_5..strokeCap = StrokeCap.square;
+
+  static Paint get _stroke_5_capButt => _stroke_5..strokeCap = StrokeCap.butt;
+
+  /// color_strokeWidth_cap
+
+  // 1
+  static Paint get black_1_capRound => _stroke_1_capRound..color = Colors.black;
+
+  static Paint get black_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.black;
+
+  static Paint get black_1_capButt => _stroke_1_capButt..color = Colors.black;
+
+  static Paint get white_1_capRound => _stroke_1_capRound..color = Colors.white;
+
+  static Paint get white_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.white;
+
+  static Paint get white_1_capButt => _stroke_1_capButt..color = Colors.white;
+
+  static Paint get red_1_capRound => _stroke_1_capRound..color = Colors.red;
+
+  static Paint get red_1_capSquare => _stroke_1_capSquare..color = Colors.red;
+
+  static Paint get red_1_capButt => _stroke_1_capButt..color = Colors.red;
+
+  static Paint get orange_1_capRound =>
+      _stroke_1_capRound..color = Colors.orange;
+
+  static Paint get orange_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.orange;
+
+  static Paint get orange_1_capButt => _stroke_1_capButt..color = Colors.orange;
+
+  static Paint get yellow_1_capRound =>
+      _stroke_1_capRound..color = Colors.yellow;
+
+  static Paint get yellow_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.yellow;
+
+  static Paint get yellow_1_capButt => _stroke_1_capButt..color = Colors.yellow;
+
+  static Paint get green_1_capRound => _stroke_1_capRound..color = Colors.green;
+
+  static Paint get green_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.green;
+
+  static Paint get green_1_capButt => _stroke_1_capButt..color = Colors.green;
+
+  static Paint get blue_1_capRound => _stroke_1_capRound..color = Colors.blue;
+
+  static Paint get blue_1_capSquare => _stroke_1_capSquare..color = Colors.blue;
+
+  static Paint get blue_1_capButt => _stroke_1_capButt..color = Colors.blue;
+
+  static Paint get blueAccent_1_capRound =>
+      _stroke_1_capRound..color = Colors.blueAccent;
+
+  static Paint get blueAccent_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.blueAccent;
+
+  static Paint get blueAccent_1_capButt =>
+      _stroke_1_capButt..color = Colors.blueAccent;
+
+  static Paint get purple_1_capRound =>
+      _stroke_1_capRound..color = Colors.purple;
+
+  static Paint get purple_1_capSquare =>
+      _stroke_1_capSquare..color = Colors.purple;
+
+  static Paint get purple_1_capButt => _stroke_1_capButt..color = Colors.purple;
+
+  // 2
+  static Paint get black_2_capRound => _stroke_2_capRound..color = Colors.black;
+
+  static Paint get black_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.black;
+
+  static Paint get black_2_capButt => _stroke_2_capButt..color = Colors.black;
+
+  static Paint get white_2_capRound => _stroke_2_capRound..color = Colors.white;
+
+  static Paint get white_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.white;
+
+  static Paint get white_2_capButt => _stroke_2_capButt..color = Colors.white;
+
+  static Paint get red_2_capRound => _stroke_2_capRound..color = Colors.red;
+
+  static Paint get red_2_capSquare => _stroke_2_capSquare..color = Colors.red;
+
+  static Paint get red_2_capButt => _stroke_2_capButt..color = Colors.red;
+
+  static Paint get orange_2_capRound =>
+      _stroke_2_capRound..color = Colors.orange;
+
+  static Paint get orange_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.orange;
+
+  static Paint get orange_2_capButt => _stroke_2_capButt..color = Colors.orange;
+
+  static Paint get yellow_2_capRound =>
+      _stroke_2_capRound..color = Colors.yellow;
+
+  static Paint get yellow_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.yellow;
+
+  static Paint get yellow_2_capButt => _stroke_2_capButt..color = Colors.yellow;
+
+  static Paint get green_2_capRound => _stroke_2_capRound..color = Colors.green;
+
+  static Paint get green_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.green;
+
+  static Paint get green_2_capButt => _stroke_2_capButt..color = Colors.green;
+
+  static Paint get blue_2_capRound => _stroke_2_capRound..color = Colors.blue;
+
+  static Paint get blue_2_capSquare => _stroke_2_capSquare..color = Colors.blue;
+
+  static Paint get blue_2_capButt => _stroke_2_capButt..color = Colors.blue;
+
+  static Paint get blueAccent_2_capRound =>
+      _stroke_2_capRound..color = Colors.blueAccent;
+
+  static Paint get blueAccent_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.blueAccent;
+
+  static Paint get blueAccent_2_capButt =>
+      _stroke_2_capButt..color = Colors.blueAccent;
+
+  static Paint get purple_2_capRound =>
+      _stroke_2_capRound..color = Colors.purple;
+
+  static Paint get purple_2_capSquare =>
+      _stroke_2_capSquare..color = Colors.purple;
+
+  static Paint get purple_2_capButt => _stroke_2_capButt..color = Colors.purple;
+
+  // 3
+  static Paint get black_3_capRound => _stroke_3_capRound..color = Colors.black;
+
+  static Paint get black_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.black;
+
+  static Paint get black_3_capButt => _stroke_3_capButt..color = Colors.black;
+
+  static Paint get white_3_capRound => _stroke_3_capRound..color = Colors.white;
+
+  static Paint get white_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.white;
+
+  static Paint get white_3_capButt => _stroke_3_capButt..color = Colors.white;
+
+  static Paint get red_3_capRound => _stroke_3_capRound..color = Colors.red;
+
+  static Paint get red_3_capSquare => _stroke_3_capSquare..color = Colors.red;
+
+  static Paint get red_3_capButt => _stroke_3_capButt..color = Colors.red;
+
+  static Paint get orange_3_capRound =>
+      _stroke_3_capRound..color = Colors.orange;
+
+  static Paint get orange_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.orange;
+
+  static Paint get orange_3_capButt => _stroke_3_capButt..color = Colors.orange;
+
+  static Paint get yellow_3_capRound =>
+      _stroke_3_capRound..color = Colors.yellow;
+
+  static Paint get yellow_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.yellow;
+
+  static Paint get yellow_3_capButt => _stroke_3_capButt..color = Colors.yellow;
+
+  static Paint get green_3_capRound => _stroke_3_capRound..color = Colors.green;
+
+  static Paint get green_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.green;
+
+  static Paint get green_3_capButt => _stroke_3_capButt..color = Colors.green;
+
+  static Paint get blue_3_capRound => _stroke_3_capRound..color = Colors.blue;
+
+  static Paint get blue_3_capSquare => _stroke_3_capSquare..color = Colors.blue;
+
+  static Paint get blue_3_capButt => _stroke_3_capButt..color = Colors.blue;
+
+  static Paint get blueAccent_3_capRound =>
+      _stroke_3_capRound..color = Colors.blueAccent;
+
+  static Paint get blueAccent_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.blueAccent;
+
+  static Paint get blueAccent_3_capButt =>
+      _stroke_3_capButt..color = Colors.blueAccent;
+
+  static Paint get purple_3_capRound =>
+      _stroke_3_capRound..color = Colors.purple;
+
+  static Paint get purple_3_capSquare =>
+      _stroke_3_capSquare..color = Colors.purple;
+
+  static Paint get purple_3_capButt => _stroke_3_capButt..color = Colors.purple;
+
+  // 4
+  static Paint get black_4_capRound => _stroke_4_capRound..color = Colors.black;
+
+  static Paint get black_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.black;
+
+  static Paint get black_4_capButt => _stroke_4_capButt..color = Colors.black;
+
+  static Paint get white_4_capRound => _stroke_4_capRound..color = Colors.white;
+
+  static Paint get white_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.white;
+
+  static Paint get white_4_capButt => _stroke_4_capButt..color = Colors.white;
+
+  static Paint get red_4_capRound => _stroke_4_capRound..color = Colors.red;
+
+  static Paint get red_4_capSquare => _stroke_4_capSquare..color = Colors.red;
+
+  static Paint get red_4_capButt => _stroke_4_capButt..color = Colors.red;
+
+  static Paint get orange_4_capRound =>
+      _stroke_4_capRound..color = Colors.orange;
+
+  static Paint get orange_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.orange;
+
+  static Paint get orange_4_capButt => _stroke_4_capButt..color = Colors.orange;
+
+  static Paint get yellow_4_capRound =>
+      _stroke_4_capRound..color = Colors.yellow;
+
+  static Paint get yellow_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.yellow;
+
+  static Paint get yellow_4_capButt => _stroke_4_capButt..color = Colors.yellow;
+
+  static Paint get green_4_capRound => _stroke_4_capRound..color = Colors.green;
+
+  static Paint get green_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.green;
+
+  static Paint get green_4_capButt => _stroke_4_capButt..color = Colors.green;
+
+  static Paint get blue_4_capRound => _stroke_4_capRound..color = Colors.blue;
+
+  static Paint get blue_4_capSquare => _stroke_4_capSquare..color = Colors.blue;
+
+  static Paint get blue_4_capButt => _stroke_4_capButt..color = Colors.blue;
+
+  static Paint get blueAccent_4_capRound =>
+      _stroke_4_capRound..color = Colors.blueAccent;
+
+  static Paint get blueAccent_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.blueAccent;
+
+  static Paint get blueAccent_4_capButt =>
+      _stroke_4_capButt..color = Colors.blueAccent;
+
+  static Paint get purple_4_capRound =>
+      _stroke_4_capRound..color = Colors.purple;
+
+  static Paint get purple_4_capSquare =>
+      _stroke_4_capSquare..color = Colors.purple;
+
+  static Paint get purple_4_capButt => _stroke_4_capButt..color = Colors.purple;
+
+  // 5
+  static Paint get black_5_capRound => _stroke_5_capRound..color = Colors.black;
+
+  static Paint get black_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.black;
+
+  static Paint get black_5_capButt => _stroke_5_capButt..color = Colors.black;
+
+  static Paint get white_5_capRound => _stroke_5_capRound..color = Colors.white;
+
+  static Paint get white_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.white;
+
+  static Paint get white_5_capButt => _stroke_5_capButt..color = Colors.white;
+
+  static Paint get red_5_capRound => _stroke_5_capRound..color = Colors.red;
+
+  static Paint get red_5_capSquare => _stroke_5_capSquare..color = Colors.red;
+
+  static Paint get red_5_capButt => _stroke_5_capButt..color = Colors.red;
+
+  static Paint get orange_5_capRound =>
+      _stroke_5_capRound..color = Colors.orange;
+
+  static Paint get orange_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.orange;
+
+  static Paint get orange_5_capButt => _stroke_5_capButt..color = Colors.orange;
+
+  static Paint get yellow_5_capRound =>
+      _stroke_5_capRound..color = Colors.yellow;
+
+  static Paint get yellow_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.yellow;
+
+  static Paint get yellow_5_capButt => _stroke_5_capButt..color = Colors.yellow;
+
+  static Paint get green_5_capRound => _stroke_5_capRound..color = Colors.green;
+
+  static Paint get green_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.green;
+
+  static Paint get green_5_capButt => _stroke_5_capButt..color = Colors.green;
+
+  static Paint get blue_5_capRound => _stroke_5_capRound..color = Colors.blue;
+
+  static Paint get blue_5_capSquare => _stroke_5_capSquare..color = Colors.blue;
+
+  static Paint get blue_5_capButt => _stroke_5_capButt..color = Colors.blue;
+
+  static Paint get blueAccent_5_capRound =>
+      _stroke_5_capRound..color = Colors.blueAccent;
+
+  static Paint get blueAccent_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.blueAccent;
+
+  static Paint get blueAccent_5_capButt =>
+      _stroke_5_capButt..color = Colors.blueAccent;
+
+  static Paint get purple_5_capRound =>
+      _stroke_5_capRound..color = Colors.purple;
+
+  static Paint get purple_5_capSquare =>
+      _stroke_5_capSquare..color = Colors.purple;
+
+  static Paint get purple_5_capButt => _stroke_5_capButt..color = Colors.purple;
+
+  /// eraser
+  static Paint get _eraser => _stroke..color = Colors.transparent;
+
+  static Paint get _eraser_clear => _eraser..blendMode = BlendMode.clear;
+
+  static Paint get eraser_1 => _eraser_clear..strokeWidth = 1;
+
+  static Paint get eraser_2 => _eraser_clear..strokeWidth = 2;
+
+  static Paint get eraser_3 => _eraser_clear..strokeWidth = 3;
+
+  static Paint get eraser_4 => _eraser_clear..strokeWidth = 4;
+
+  static Paint get eraser_5 => _eraser_clear..strokeWidth = 5;
+}
+
+extension KMaskFilter on Paint {
+  /// normal
+  static const MaskFilter normal_05 = MaskFilter.blur(BlurStyle.normal, 0.5);
+  static const MaskFilter normal_1 = MaskFilter.blur(BlurStyle.normal, 1);
+  static const MaskFilter normal_2 = MaskFilter.blur(BlurStyle.normal, 2);
+  static const MaskFilter normal_3 = MaskFilter.blur(BlurStyle.normal, 3);
+  static const MaskFilter normal_4 = MaskFilter.blur(BlurStyle.normal, 4);
+  static const MaskFilter normal_5 = MaskFilter.blur(BlurStyle.normal, 5);
+  static const MaskFilter normal_6 = MaskFilter.blur(BlurStyle.normal, 6);
+  static const MaskFilter normal_7 = MaskFilter.blur(BlurStyle.normal, 7);
+  static const MaskFilter normal_8 = MaskFilter.blur(BlurStyle.normal, 8);
+  static const MaskFilter normal_9 = MaskFilter.blur(BlurStyle.normal, 9);
+  static const MaskFilter normal_10 = MaskFilter.blur(BlurStyle.normal, 10);
+
+  /// solid
+  static const MaskFilter solid_05 = MaskFilter.blur(BlurStyle.solid, 0.5);
+}
+
+///
+///
+///
+/// clipper
+///
+///
+///
+
+extension FClipPath on CustomPaint {
+  static ClipPath decoratedPolygon(
+    Decoration decoration,
+    RRegularPolygon polygon, {
+    DecorationPosition position = DecorationPosition.background,
+    Widget child = KSizedBox.expand,
   }) =>
-      InputDecoration(
-        alignLabelWithHint: true,
-        border: border,
-        contentPadding: switch (border) {
-          KInputBorder.outline => null,
-          null => EdgeInsets.zero,
-          _ => throw UnimplementedError(),
-        },
-        label: Row(
-          children: [
-            icon,
-            Text(text, style: KTextStyle.roboto),
-          ],
+      ClipPath(
+        clipper: FMyClipper.polygonCubicCornerFromSize(polygon),
+        child: DecoratedBox(
+          decoration: decoration,
+          position: position,
+          child: child,
         ),
       );
 }
 
-extension FImageLoadingBuilder on ImageLoadingBuilder {
-  static Widget style1(
-    BuildContext context,
-    Widget child,
-    ImageChunkEvent? loadingProgress,
-  ) =>
-      loadingProgress == null
-          ? child
-          : Center(
-              child: CircularProgressIndicator(
-                color: Colors.blueGrey,
-                value: loadingProgress.expectedTotalBytes != null &&
-                        loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            );
+extension FMyClipper on MyClipper {
+  static MyClipper rectOf(Rect rect) =>
+      MyClipper.reClipNeverOf((_) => Path()..addRect(rect));
 
-  static Widget style2(
-    BuildContext context,
-    Widget child,
-    ImageChunkEvent? loadingProgress,
-  ) =>
-      loadingProgress == null
-          ? child
-          : SizedBox(
-              width: 90,
-              height: 90,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.grey,
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
-                ),
-              ),
-            );
+  static MyClipper rectFromZeroTo(Offset corner) =>
+      rectOf(Rect.fromPoints(Offset.zero, corner));
 
-  static Widget style3(
-    BuildContext ctx,
-    Widget child,
-    ImageChunkEvent? loadingProgress,
-  ) =>
-      loadingProgress == null
-          ? child
-          : Center(
-              child: CircularProgressIndicator(
-                color: Colors.blueGrey,
-                value: loadingProgress.expectedTotalBytes != null &&
-                        loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            );
-
-  static Widget style4(
-    BuildContext context,
-    Widget child,
-    ImageChunkEvent? loadingProgress,
-  ) =>
-      loadingProgress == null
-          ? child
-          : Container(
-              decoration: KBoxDecorationBorderRadius.circularAllGrey_10,
-              width: 200,
-              height: 200,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.brown,
-                  value: loadingProgress.expectedTotalBytes != null &&
-                          loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
-                ),
-              ),
-            );
+  static MyClipper polygonCubicCornerFromSize(RRegularPolygon polygon) =>
+      MyClipper.reClipNeverOf(
+        FPathFromSize.polygonCubicCornerFromSize(polygon.cubicPoints),
+      );
 }
 
-extension FImageErrorWidgetBuilder on ImageErrorWidgetBuilder {
-  static Widget accountStyle2(BuildContext c, Object o, StackTrace? s) =>
-      KIcon.accountCircleStyle2;
-
-  static Widget errorStyle1(BuildContext c, Object o, StackTrace? s) =>
-      const SizedBox(height: 200, width: 200, child: Icon(Icons.error));
+extension FMyClipperMationTransform on MyAnimation {
+  static MyAnimation rotate({
+    Clip clipBehavior = Clip.antiAlias,
+    required AlignmentGeometry alignment,
+    required Ani setting,
+    required Between<Coordinate> tween,
+    required Translator<Size, Path> sizeToPath,
+    required Widget child,
+  }) =>
+      MyAnimation(
+        mation: _MationTransformBase.rotate(alignment: alignment, tween),
+        child: ClipPath(
+          clipper: MyClipper.reClipNeverOf(sizeToPath),
+          clipBehavior: clipBehavior,
+          child: child,
+        ),
+      );
 }
 
-extension FOnOffsetListWithSize on OnOffsetListWithSize {
-  static List<Offset> transformPointsToSizeCenter(
-    List<Offset> points,
-    Size size,
+extension FMyClipperMationTransformRowTransform on MyAnimation {
+  static MyAnimation rotateHalfCircleFlip({
+    MainAxisAlignment halfCircleAlignment = MainAxisAlignment.center,
+    Widget? childRight,
+    Widget? childLeft,
+    required Between<Coordinate> tweenRotate,
+    required Between<Coordinate> tweenFlip,
+    required AnimationStatusListener statusListenerRotate,
+    required AnimationStatusListener statusListenerFlip,
+    required bool isFlipped,
+  }) =>
+      MyAnimation(
+        ani: Ani.initForward(
+          initialStatusListener: statusListenerRotate,
+          updateProcess: FAni.decideResetForward(isFlipped),
+        ),
+        mation: _MationTransformBase.rotate(
+          alignment: Alignment.center,
+          tweenRotate,
+        ),
+        child: Row(
+          mainAxisAlignment: halfCircleAlignment,
+          children: [
+            FMyClipperMationTransform.rotate(
+              tween: tweenFlip,
+              alignment: Alignment.centerRight,
+              sizeToPath: FPathFromSize.circleHalfOf(false),
+              setting: Ani(
+                updateProcess: FAni.decideResetForward(!isFlipped),
+              ),
+              child: childLeft ?? FSizedBox.square100Of(KColoredBox.blue),
+            ),
+            FMyClipperMationTransform.rotate(
+              tween: tweenFlip,
+              alignment: Alignment.centerLeft,
+              sizeToPath: FPathFromSize.circleHalfOf(true),
+              setting: Ani(
+                initialStatusListener: statusListenerFlip,
+                updateProcess: FAni.decideResetForward(!isFlipped),
+              ),
+              child: childRight ?? FSizedBox.square100Of(KColoredBox.yellow),
+            ),
+          ],
+          // children: [VContainerStyled.gradiantWhitRed],
+        ),
+      );
+}
+
+///
+///
+/// painter
+///
+///
+
+extension FCustomPaint on CustomPaint {
+  static CustomPaint polygonCanvasSizeToPaint(
+    RRegularPolygonCubicOnEdge polygon,
+    PaintFromCanvasSize paintFromCanvasSize, {
+    Widget child = KSizedBox.expand,
+  }) =>
+      CustomPaint(
+        painter: FMyPainter.polygonCubicCorner(paintFromCanvasSize, polygon),
+        child: child,
+      );
+}
+
+extension FMyPainter on MyPainter {
+  static MyPainter polygonCubicCorner(
+    PaintFromCanvasSize paintFromCanvasSize,
+    RRegularPolygon polygon,
   ) =>
-      points.adjustCenterOf(size);
+      MyPainter.rePaintNever(
+        paintFromCanvasSize: paintFromCanvasSize,
+        sizeToPath: FPathFromSize.polygonCubicCorner(polygon.cubicPoints),
+      );
+}
+
+extension FMationPainter on MationPainter {
+  static MationPainter progressingCircles({
+    double initialCircleRadius = 5.0,
+    double circleRadiusFactor = 0.1,
+    required Ani setting,
+    required Paint paint,
+    required Tween<double> radiusOrbit,
+    required int circleCount,
+    required MapperWith<Vector, int> planetGenerator,
+  }) =>
+      MationPainter.drawPathTweenWithPaint(
+        canvasSizeToPaint: (_, __) => paint,
+        BetweenPath.fromTween(
+          Between<Vector>(
+            begin: Vector(Coordinate.zero, radiusOrbit.begin!),
+            end: Vector(KRadianCoordinate.angleZ_360, radiusOrbit.end!),
+          ),
+          lerp: (vector) => PathOperation.union.operateSizeToPathAll(
+            Iterable.generate(
+              circleCount,
+              (i) => (_) => Path()
+                ..addOval(
+                  Rect.fromCircle(
+                    center: planetGenerator(vector, i).toCoordinate,
+                    radius: initialCircleRadius * (i + 1) * circleRadiusFactor,
+                  ),
+                ),
+            ),
+          ),
+        ),
+      );
+}
+
+///
+///
+/// polygon
+///
+///
+
+extension FRRegularPolygon on RRegularPolygon {
+  static RRegularPolygonCubicOnEdge randomOfCubicStyleOnEdge({
+    MapEntry<int, int> nBound = const MapEntry(3, 8),
+    MapEntry<int, int> rBound = const MapEntry(60, 60),
+  }) {
+    final r = math.Random();
+    return RRegularPolygonCubicOnEdge(
+      nBound.key + r.nextInt(nBound.value),
+      radiusCircumscribedCircle: rBound.key + r.nextInt(rBound.value),
+    );
+  }
 }

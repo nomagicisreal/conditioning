@@ -1,6 +1,3 @@
-
-
-
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -36,13 +33,13 @@ class _MusicCounterState extends State<MusicCounter> {
   int _beepValue = 0;
 
   Iterable<Timer> get _timers => [
-    _hiHatTick,
-    _punch,
-    _drum,
-    _string,
-    _keyboard,
-    _beep,
-  ];
+        _hiHatTick,
+        _punch,
+        _drum,
+        _string,
+        _keyboard,
+        _beep,
+      ];
 
   @override
   void initState() {
@@ -75,7 +72,8 @@ class _MusicCounterState extends State<MusicCounter> {
               _beepValue = 0;
             });
 
-            final duration = KDuration.milli306 * 8; // 2, 448 -> 4, 896 -> 7, 344 -> 9, 792
+            final duration =
+                KDuration.milli306 * 8; // 2, 448 -> 4, 896 -> 7, 344 -> 9, 792
             ///
             /// (1): 0, 306  --- (1.5): 0, 459
             /// (2): 0, 612  --- (2.5): 0, 765
@@ -88,73 +86,83 @@ class _MusicCounterState extends State<MusicCounter> {
             ///
 
             final beats = Beats(duration);
-            Timer(
-              KDuration.second10 + KDuration.milli150 - duration,
-                  () {
-                Timer(duration, () {
-                  _hiHatTick = beats.timerOf(
-                    maxTick: 57,
-                    listener: setStateOf(() => _hiHatTickValue++),
+            FTimer.nest([
+              (
+                KDuration.second10 + KDuration.milli150 - duration,
+                () {
+                  _string = beats.timerOf(
+                    listener: (timer) => setState(() => _stringValue++),
+                    style: const BeatsStyle.of8(
+                      maxTick: 8,
+                      sequences: [5, 7],
+                    ),
                   );
-                  _punch = beats.timerOf(
-                    maxTick: 56,
-                    sequences: [3, 7],
-                    listener: setStateOf(() => _punchValue++),
+                  _keyboard = beats.timerOf(
+                    listener: (timer) => setState(() => _keyboardValue++),
+                    style: const BeatsStyle.of16(
+                      maxTick: 16,
+                      sequences: [11, 13, 14, 0],
+                    ),
                   );
-                  _drum = beats.timerOf(
-                    interval: 16,
-                    maxTick: 112,
-                    sequences: [2, 9, 10, 12, 0],
-                    listener: setStateOf(() => _drumValue++),
+                }
+              ),
+              (
+                duration,
+                () {
+                  _string = beats.timerOf(
+                    listener: (timer) => setState(() => _stringValue++),
+                    style: const BeatsStyle.of16(
+                      cycle: 4,
+                      maxTick: 76,
+                      sequences: [2, 4, 6, 8, 9, 10, 11, 12],
+                    ),
                   );
 
                   _keyboard = beats.timerOf(
-                    interval: 16,
-                    maxTick: 112,
-                    cycle: 2,
-                    sequences: [2, 4, 5, 27, 29, 30, 0],
-                    listener: setStateOf(() => _keyboardValue++),
+                    listener: (timer) => setState(() => _keyboardValue++),
+                    style: const BeatsStyle.of16(
+                      cycle: 2,
+                      maxTick: 112,
+                      sequences: [2, 4, 5, 27, 29, 30, 0],
+                    ),
                   );
 
-                  _string = beats.timerOf(
-                    interval: 16,
-                    maxTick: 76,
-                    cycle: 4,
-                    sequences: [2, 4, 6, 8, 9, 10, 11, 12],
-                    listener: setStateOf(() => _stringValue++),
+                  _hiHatTick = beats.timerOf(
+                    listener: (timer) => setState(() => _hiHatTickValue++),
+                    style: const BeatsStyle.of8(maxTick: 57),
+                  );
+                  _punch = beats.timerOf(
+                    listener: (timer) => setState(() => _punchValue++),
+                    style: const BeatsStyle.of8(maxTick: 56, sequences: [3, 7]),
+                  );
+                  _drum = beats.timerOf(
+                    listener: (timer) => setState(() => _drumValue++),
+                    style: const BeatsStyle.of16(
+                      maxTick: 112,
+                      sequences: [2, 9, 10, 12, 0],
+                    ),
                   );
 
                   _beep = beats.timerOf(
-                    interval: 16,
-                    maxTick: 0,
-                    cycle: 2,
-                    sequences: [2, 5, 18, 22],
-                    listener: setStateOf(() => _beepValue++),
+                    listener: (timer) => setState(() => _beepValue++),
+                    style: const BeatsStyle.of16(
+                      maxTick: 1,
+                      cycle: 2,
+                      sequences: [2, 5, 18, 22],
+                    ),
                   );
-                });
-
-                _string = beats.timerOf(
-                  maxTick: 8,
-                  sequences: [5, 7],
-                  listener: setStateOf(() => _stringValue++),
-                );
-                _keyboard = beats.timerOf(
-                  interval: 16,
-                  maxTick: 16,
-                  sequences: [11, 13, 14, 0],
-                  listener: setStateOf(() => _keyboardValue++),
-                );
-              },
-            );
+                }
+              ),
+            ]);
           },
-          child: KIcon.play,
+          child: KIconMaterial.play,
         ),
         ElevatedButton(
           onPressed: () async {
             await player.stop();
             _timers.cancelAll();
           },
-          child: KIcon.stop,
+          child: KIconMaterial.stop,
         ),
         Center(
           child: DefaultTextStyle(

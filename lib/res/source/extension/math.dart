@@ -1,18 +1,20 @@
 part of source;
 
 ///
-///
 /// this file contains:
-///
-/// enums:
 /// [Operator]
-/// [Dimension]
-/// [Direction2D], [Direction2DVector], [Direction3D]
+/// [Direction]
+/// [Direction2DIn4], [Direction2DIn8]
+/// [Direction3DIn6], [Direction3DIn14], [Direction3DIn22]
 ///
-/// class:
-/// [RegularPolygon], [RRegularPolygon], [RRegularPolygonCubicStyleOnEdge]
+/// [RegularPolygon], [RRegularPolygon], [RRegularPolygonCubicOnEdge]
 /// [Vector]
-/// [_CoordinateBase], [Coordinate]
+/// [Coordinate]
+///
+/// [AlignmentExtension]
+/// [PositionedExtension]
+/// [Matrix4Extension]
+/// [PathExtension], [PathOperationExtension]
 ///
 ///
 
@@ -41,15 +43,19 @@ enum Operator {
         Operator.modulus => throw UnimplementedError(),
       };
 
-  /// operation
-  String operationOf(String a, String b) => "$a $latex $b";
+  ///
+  /// latex operation
+  ///
+  String latexOperationOf(String a, String b) => "$a $latex $b";
 
-  String operationOfDouble(double a, double b, {int fix = 0}) =>
+  String latexOperationOfDouble(double a, double b, {int fix = 0}) =>
       "${a.toStringAsFixed(fix)} "
       "$latex "
       "${b.toStringAsFixed(fix)}";
 
-  /// operation column form
+  ///
+  /// widget operation
+  ///
   Widget columnFormOfDoubleOperation(
     double a,
     double b, {
@@ -83,7 +89,9 @@ enum Operator {
         result: CustomText.ofDuration(operateDuration(a, b), style: textStyle),
       );
 
+  ///
   /// icon
+  ///
   Icon get icon => Icon(_iconData);
 
   IconData get _iconData => switch (this) {
@@ -94,7 +102,9 @@ enum Operator {
         Operator.modulus => CupertinoIcons.percent,
       };
 
-  /// operate
+  ///
+  /// operate value
+  ///
   double operateDouble(double a, double b) => switch (this) {
         Operator.plus => a + b,
         Operator.minus => a - b,
@@ -103,21 +113,26 @@ enum Operator {
         Operator.modulus => a % b,
       };
 
+  static double operateDoubleAll(
+    double value,
+    Iterable<(Operator, double)> operations,
+  ) =>
+      operations.fold(
+        value,
+        (a, opertion) => switch (opertion.$1) {
+          Operator.plus => a + opertion.$2,
+          Operator.minus => a - opertion.$2,
+          Operator.multiply => a * opertion.$2,
+          Operator.divide => a / opertion.$2,
+          Operator.modulus => a % opertion.$2,
+        },
+      );
+
   Duration operateDuration(Duration a, Duration b) => switch (this) {
         Operator.plus => a + b,
         Operator.minus => a - b,
         _ => throw UnimplementedError(),
       };
-
-  Duration operateDurationMilli(Duration d, int value) => Duration(
-        milliseconds: switch (this) {
-          Operator.plus => d.inMilliseconds + value,
-          Operator.minus => d.inMilliseconds - value,
-          Operator.multiply => (d.inMilliseconds * value).toInt(),
-          Operator.divide => d.inMilliseconds ~/ value,
-          Operator.modulus => d.inMilliseconds % value,
-        },
-      );
 
   Color operateColorWithValue(Color color, int value) => switch (this) {
         Operator.plus => color.plusARGB(0, value, value, value),
@@ -126,108 +141,172 @@ enum Operator {
         Operator.divide => color.divideARGB(1, value, value, value),
         Operator.modulus => throw UnimplementedError(),
       };
-}
 
-enum Dimension { x, y, z }
+  T operationOf<T>(T a, T b) => switch (T) {
+        double => operateDouble(a as double, b as double),
+        Duration => operateDuration(a as Duration, b as Duration),
+        _ => throw UnimplementedError(),
+      } as T;
 
-enum Direction2D { left, top, right, bottom }
+  ///
+  /// mapper
+  ///
 
-enum Direction2DVector {
-  left,
-  leftTwiceForLeft,
-  leftTwiceForMiddle,
-  leftTwiceForRight,
-  top,
-  right,
-  rightTwiceForRight,
-  rightTwiceForMeddle,
-  rightTwiceForLeft,
-  bottom,
-  leftUp,
-  leftDown,
-  rightUp,
-  rightDown;
-
-  MyTween<Coordinate> tweenOf(
-    bool isNavIn,
-    CurveFR curve,
-  ) =>
-      switch (isNavIn) {
-        true => MyTween(
-            begin: switch (this) {
-              Direction2DVector.left => KCoordinateDirection.left,
-              Direction2DVector.leftTwiceForLeft => throw UnimplementedError(),
-              Direction2DVector.leftTwiceForMiddle =>
-                throw UnimplementedError(),
-              Direction2DVector.leftTwiceForRight =>
-                KCoordinateDirection.left * 2,
-              Direction2DVector.top => KCoordinateDirection.top,
-              Direction2DVector.right => KCoordinateDirection.right,
-              Direction2DVector.rightTwiceForRight =>
-                throw UnimplementedError(),
-              Direction2DVector.rightTwiceForMeddle =>
-                throw UnimplementedError(),
-              Direction2DVector.rightTwiceForLeft =>
-                KCoordinateDirection.right * 2,
-              Direction2DVector.bottom => KCoordinateDirection.bottom,
-              Direction2DVector.leftUp => KCoordinateDirection.topLeft,
-              Direction2DVector.leftDown => KCoordinateDirection.backLeft,
-              Direction2DVector.rightUp => KCoordinateDirection.topRight,
-              Direction2DVector.rightDown => KCoordinateDirection.backRight,
-            },
-            end: Coordinate.zero,
-            curve: curve,
-          ),
-        false => MyTween(
-            begin: switch (this) {
-              Direction2DVector.left => Coordinate.zero,
-              Direction2DVector.leftTwiceForLeft => Coordinate.zero,
-              Direction2DVector.leftTwiceForMiddle => KCoordinateDirection.left,
-              Direction2DVector.leftTwiceForRight => throw UnimplementedError(),
-              Direction2DVector.top => Coordinate.zero,
-              Direction2DVector.right => Coordinate.zero,
-              Direction2DVector.rightTwiceForRight => Coordinate.zero,
-              Direction2DVector.rightTwiceForMeddle =>
-                KCoordinateDirection.right,
-              Direction2DVector.rightTwiceForLeft => throw UnimplementedError(),
-              Direction2DVector.bottom => Coordinate.zero,
-              Direction2DVector.leftUp => Coordinate.zero,
-              Direction2DVector.leftDown => Coordinate.zero,
-              Direction2DVector.rightUp => Coordinate.zero,
-              Direction2DVector.rightDown => Coordinate.zero,
-            },
-            end: switch (this) {
-              Direction2DVector.left => KCoordinateDirection.right,
-              Direction2DVector.leftTwiceForLeft =>
-                KCoordinateDirection.right * 2,
-              Direction2DVector.leftTwiceForMiddle =>
-                KCoordinateDirection.right,
-              Direction2DVector.leftTwiceForRight => throw UnimplementedError(),
-              Direction2DVector.top => KCoordinateDirection.bottom,
-              Direction2DVector.right => KCoordinateDirection.left,
-              Direction2DVector.rightTwiceForRight =>
-                KCoordinateDirection.left * 2,
-              Direction2DVector.rightTwiceForMeddle =>
-                KCoordinateDirection.left,
-              Direction2DVector.rightTwiceForLeft => throw UnimplementedError(),
-              Direction2DVector.bottom => KCoordinateDirection.top,
-              Direction2DVector.leftUp => KCoordinateDirection.backRight,
-              Direction2DVector.leftDown => KCoordinateDirection.topRight,
-              Direction2DVector.rightUp => KCoordinateDirection.backLeft,
-              Direction2DVector.rightDown => KCoordinateDirection.topLeft,
-            },
-            curve: curve,
-          ),
+  Mapper<double> doubleMapperWith(double b) => switch (this) {
+        Operator.plus => (a) => a + b,
+        Operator.minus => (a) => a - b,
+        Operator.multiply => (a) => a * b,
+        Operator.divide => (a) => a / b,
+        Operator.modulus => (a) => a % b,
       };
 }
 
-enum Direction3D {
-  front,
-  back,
+///
+///
+/// [Direction]
+/// 2D:
+///   [Direction2DIn4]
+///   [Direction2DIn8]
+/// 3D:
+///   [Direction3DIn6]
+///   [Direction3DIn14]
+///   [Direction3DIn22]
+///
+///
+
+base mixin Direction<D> {
+  D get flipped;
+
+  Offset get toOffset;
+
+  Coordinate get toCoordinate;
+}
+
+enum Direction2DIn4 with Direction<Direction2DIn4> {
+  left,
+  right,
+  top,
+  bottom;
+
+  @override
+  Direction2DIn4 get flipped => switch (this) {
+        Direction2DIn4.left => Direction2DIn4.right,
+        Direction2DIn4.right => Direction2DIn4.left,
+        Direction2DIn4.top => Direction2DIn4.top,
+        Direction2DIn4.bottom => Direction2DIn4.bottom,
+      };
+
+  @override
+  Offset get toOffset => switch (this) {
+        Direction2DIn4.left => KOffsetDirection.left,
+        Direction2DIn4.right => KOffsetDirection.right,
+        Direction2DIn4.top => KOffsetDirection.top,
+        Direction2DIn4.bottom => KOffsetDirection.bottom,
+      };
+
+  @override
+  Coordinate get toCoordinate => switch (this) {
+        Direction2DIn4.left => KCoordinateDirection.left,
+        Direction2DIn4.right => KCoordinateDirection.right,
+        Direction2DIn4.top => KCoordinateDirection.top,
+        Direction2DIn4.bottom => KCoordinateDirection.bottom,
+      };
+}
+
+enum Direction2DIn8 with Direction<Direction2DIn8> {
+  topLeft,
+  top,
+  topRight,
+  left,
+  right,
+  bottomLeft,
+  bottom,
+  bottomRight;
+
+  @override
+  Direction2DIn8 get flipped => switch (this) {
+        top => Direction2DIn8.bottom,
+        left => Direction2DIn8.right,
+        right => Direction2DIn8.left,
+        bottom => Direction2DIn8.top,
+        topLeft => Direction2DIn8.bottomRight,
+        topRight => Direction2DIn8.bottomLeft,
+        bottomLeft => Direction2DIn8.topRight,
+        bottomRight => Direction2DIn8.topLeft,
+      };
+
+  @override
+  Offset get toOffset => switch (this) {
+        top => KOffsetDirection.top,
+        left => KOffsetDirection.left,
+        right => KOffsetDirection.right,
+        bottom => KOffsetDirection.bottom,
+        topLeft => KOffsetDirection.topLeft,
+        topRight => KOffsetDirection.topRight,
+        bottomLeft => KOffsetDirection.bottomLeft,
+        bottomRight => KOffsetDirection.bottomRight,
+      };
+
+  @override
+  Coordinate get toCoordinate => switch (this) {
+        top => KCoordinateDirection.top,
+        left => KCoordinateDirection.left,
+        right => KCoordinateDirection.right,
+        bottom => KCoordinateDirection.bottom,
+        topLeft => KCoordinateDirection.topLeft,
+        topRight => KCoordinateDirection.topRight,
+        bottomLeft => KCoordinateDirection.bottomLeft,
+        bottomRight => KCoordinateDirection.bottomRight,
+      };
+
+  Alignment get toAlignment => switch (this) {
+        top => Alignment.topCenter,
+        left => Alignment.centerLeft,
+        right => Alignment.centerRight,
+        bottom => Alignment.bottomCenter,
+        topLeft => Alignment.topLeft,
+        topRight => Alignment.topRight,
+        bottomLeft => Alignment.bottomLeft,
+        bottomRight => Alignment.bottomRight,
+      };
+}
+
+enum Direction3DIn6 with Direction<Direction3DIn6> {
   left,
   top,
   right,
-  bottom;
+  bottom,
+  front,
+  back;
+
+  @override
+  Direction3DIn6 get flipped => switch (this) {
+        Direction3DIn6.left => Direction3DIn6.right,
+        Direction3DIn6.top => Direction3DIn6.bottom,
+        Direction3DIn6.right => Direction3DIn6.left,
+        Direction3DIn6.bottom => Direction3DIn6.top,
+        Direction3DIn6.front => Direction3DIn6.back,
+        Direction3DIn6.back => Direction3DIn6.front,
+      };
+
+  @override
+  Offset get toOffset => switch (this) {
+        Direction3DIn6.left => KOffsetDirection.left,
+        Direction3DIn6.top => KOffsetDirection.top,
+        Direction3DIn6.right => KOffsetDirection.right,
+        Direction3DIn6.bottom => KOffsetDirection.bottom,
+        _ => throw UnimplementedError(),
+      };
+
+  @override
+  Coordinate get toCoordinate => switch (this) {
+        Direction3DIn6.left => KCoordinateDirection.left,
+        Direction3DIn6.top => KCoordinateDirection.top,
+        Direction3DIn6.right => KCoordinateDirection.right,
+        Direction3DIn6.bottom => KCoordinateDirection.bottom,
+        Direction3DIn6.front => KCoordinateDirection.front,
+        Direction3DIn6.back => KCoordinateDirection.back,
+      };
 
   ///
   /// The angle value belows are "[Matrix4] radian". see [Coordinate.fromDirection] for my "math radian".
@@ -240,7 +319,7 @@ enum Direction3D {
   /// [bottom] can be seen while [top] not be seen.
   ///
   ///
-  static List<Direction3D> parseRotation(Coordinate radian) {
+  static List<Direction3DIn6> parseRotation(Coordinate radian) {
     // ?
     final r = FRadianCoordinate.restrictInAngle180Of(radian);
 
@@ -248,19 +327,19 @@ enum Direction3D {
     final rY = r.dy;
     final rZ = r.dz;
 
-    return <Direction3D>[
+    return <Direction3DIn6>[
       FRadian.checkIfWithinAngle90_90N(rY) &&
               FRadian.checkIfWithinAngle90_90N(rX)
-          ? Direction3D.front
-          : Direction3D.back,
+          ? Direction3DIn6.front
+          : Direction3DIn6.back,
       FRadian.checkIfWithinAngle0_180N(rY) &&
               FRadian.checkIfWithinAngle90_90N(rZ)
-          ? Direction3D.left
-          : Direction3D.right,
+          ? Direction3DIn6.left
+          : Direction3DIn6.right,
       FRadian.checkIfWithinAngle0_180(rX) &&
               FRadian.checkIfWithinAngle90_90N(rZ)
-          ? Direction3D.top
-          : Direction3D.bottom,
+          ? Direction3DIn6.top
+          : Direction3DIn6.bottom,
     ];
   }
 
@@ -272,34 +351,34 @@ enum Direction3D {
     Matrix4 instance() => Matrix4.identity();
     return initialRadian == Coordinate.zero
         ? switch (this) {
-            Direction3D.front => Transform(
+            Direction3DIn6.front => Transform(
                 transform: instance(),
                 alignment: Alignment.center,
                 child: child,
               ),
-            Direction3D.back => Transform(
+            Direction3DIn6.back => Transform(
                 transform: instance()..translate(Vector3(0, 0, -zDeep)),
                 alignment: Alignment.center,
                 child: child,
               ),
-            Direction3D.left => Transform(
+            Direction3DIn6.left => Transform(
                 alignment: Alignment.centerLeft,
-                transform: instance()..rotateY(pi / 2),
+                transform: instance()..rotateY(KRadian.angle_90),
                 child: child,
               ),
-            Direction3D.right => Transform(
+            Direction3DIn6.right => Transform(
                 alignment: Alignment.centerRight,
-                transform: instance()..rotateY(-pi / 2),
+                transform: instance()..rotateY(-KRadian.angle_90),
                 child: child,
               ),
-            Direction3D.top => Transform(
+            Direction3DIn6.top => Transform(
                 alignment: Alignment.topCenter,
-                transform: instance()..rotateX(-pi / 2),
+                transform: instance()..rotateX(-KRadian.angle_90),
                 child: child,
               ),
-            Direction3D.bottom => Transform(
+            Direction3DIn6.bottom => Transform(
                 alignment: Alignment.bottomCenter,
-                transform: instance()..rotateX(pi / 2),
+                transform: instance()..rotateX(KRadian.angle_90),
                 child: child,
               ),
           }
@@ -307,17 +386,80 @@ enum Direction3D {
   }
 }
 
-///
-/// [cubicPointsMap] represents [corners]' cubic points, see [FSizeToPath.polygonCubicCorner] for implementation
-///
+enum Direction3DIn14 with Direction<Direction3DIn14> {
+  left,
+  top,
+  right,
+  bottom,
+  front,
+  frontLeft,
+  frontTop,
+  frontRight,
+  frontBottom,
+  back,
+  backLeft,
+  backTop,
+  backRight,
+  backBottom;
+
+  @override
+  Direction3DIn14 get flipped => switch (this) {
+        Direction3DIn14.left => Direction3DIn14.right,
+        Direction3DIn14.top => Direction3DIn14.bottom,
+        Direction3DIn14.right => Direction3DIn14.left,
+        Direction3DIn14.bottom => Direction3DIn14.top,
+        Direction3DIn14.front => Direction3DIn14.front,
+        Direction3DIn14.frontLeft => Direction3DIn14.frontLeft,
+        Direction3DIn14.frontTop => Direction3DIn14.frontTop,
+        Direction3DIn14.frontRight => Direction3DIn14.frontRight,
+        Direction3DIn14.frontBottom => Direction3DIn14.frontBottom,
+        Direction3DIn14.back => Direction3DIn14.back,
+        Direction3DIn14.backLeft => Direction3DIn14.backLeft,
+        Direction3DIn14.backTop => Direction3DIn14.backTop,
+        Direction3DIn14.backRight => Direction3DIn14.backRight,
+        Direction3DIn14.backBottom => Direction3DIn14.backBottom,
+      };
+
+  @override
+  Offset get toOffset => switch (this) {
+        Direction3DIn14.left => KOffsetDirection.left,
+        Direction3DIn14.top => KOffsetDirection.top,
+        Direction3DIn14.right => KOffsetDirection.right,
+        Direction3DIn14.bottom => KOffsetDirection.bottom,
+        _ => throw UnimplementedError(),
+      };
+
+  @override
+  Coordinate get toCoordinate => switch (this) {
+        Direction3DIn14.left => KCoordinateDirection.left,
+        Direction3DIn14.top => KCoordinateDirection.top,
+        Direction3DIn14.right => KCoordinateDirection.right,
+        Direction3DIn14.bottom => KCoordinateDirection.bottom,
+        Direction3DIn14.front => KCoordinateDirection.front,
+        Direction3DIn14.frontLeft => KCoordinateDirection.frontLeft,
+        Direction3DIn14.frontTop => KCoordinateDirection.frontTop,
+        Direction3DIn14.frontRight => KCoordinateDirection.frontRight,
+        Direction3DIn14.frontBottom => KCoordinateDirection.frontBottom,
+        Direction3DIn14.back => KCoordinateDirection.back,
+        Direction3DIn14.backLeft => KCoordinateDirection.backLeft,
+        Direction3DIn14.backTop => KCoordinateDirection.backTop,
+        Direction3DIn14.backRight => KCoordinateDirection.backRight,
+        Direction3DIn14.backBottom => KCoordinateDirection.backBottom,
+      };
+}
+
+enum Direction3DIn22 {
+  top;
+}
+
 
 abstract class RegularPolygon {
-  /// static functions
-
   static double radianCornerOf(int n) => (n - 2) * KRadian.angle_180 / n;
 
-  static double lengthSideOf(int n, num radiusCircumscribedCircle) => sqrt(
-        radiusCircumscribedCircle.square * 2 * (1 - cos(KRadian.angle_360 / n)),
+  static double lengthSideOf(int n, num radiusCircumscribedCircle) => math.sqrt(
+        radiusCircumscribedCircle.square *
+            2 *
+            (1 - math.cos(KRadian.angle_360 / n)),
       );
 
   static List<Offset> cornersOf(
@@ -343,10 +485,10 @@ abstract class RegularPolygon {
   ) =>
       switch (n) {
         3 => radiusCircumscribedCircle / 2,
-        4 => radiusCircumscribedCircle * sqrt1_2,
-        6 => radiusCircumscribedCircle * sqrt(3) / 2,
+        4 => radiusCircumscribedCircle * DoubleExtension.sqrt1_2,
+        6 => radiusCircumscribedCircle * DoubleExtension.sqrt3 / 2,
         _ => radiusCircumscribedCircle *
-            sin(FRadian.radianOf(FRadian.angleOf(radianCorner) / 2)),
+            math.sin(FRadian.radianOf(FRadian.angleOf(radianCorner) / 2)),
       };
 
   /// properties
@@ -374,21 +516,16 @@ abstract class RegularPolygon {
   });
 }
 
-abstract class RRegularPolygon extends RegularPolygon {
-  static List<Radius> circularRadiusListOf(int n, double radius) =>
-      List.generate(n, (index) => Radius.circular(radius));
-
-  /// properties
-
+sealed class RRegularPolygon extends RegularPolygon {
   final List<Radius> radiusList;
-  CubicPointsMapper cubicPointsMapper;
+  final Mapper<Map<Offset, List<Offset>>> cubicPointsMapper;
 
   Map<Offset, List<Offset>> get _cubicPointsForEachCorners;
 
   Iterable<List<Offset>> get cubicPoints =>
       cubicPointsMapper(_cubicPointsForEachCorners).values;
 
-  RRegularPolygon(
+  const RRegularPolygon(
     super.n, {
     required this.radiusList,
     required this.cubicPointsMapper,
@@ -396,25 +533,23 @@ abstract class RRegularPolygon extends RegularPolygon {
   });
 }
 
-class RRegularPolygonCubicStyleOnEdge extends RRegularPolygon {
+class RRegularPolygonCubicOnEdge extends RRegularPolygon {
   double cornerRadius;
   double timesForEdge;
 
-  double get timesForEdgeUnit => cornerRadius * tan(KRadian.angle_180 / n);
+  double get timesForEdgeUnit => cornerRadius * math.tan(KRadian.angle_180 / n);
 
-  RRegularPolygonCubicStyleOnEdge(
+  RRegularPolygonCubicOnEdge(
     super.n, {
     this.cornerRadius = 0,
     this.timesForEdge = 0,
-    super.cubicPointsMapper = KCubicPointsMapper.add1_remove1,
+    super.cubicPointsMapper = KMapperCubicPointsPermutation.p0231,
     required super.radiusCircumscribedCircle,
-  }) : super(
-          radiusList: RRegularPolygon.circularRadiusListOf(n, cornerRadius),
-        );
+  }) : super(radiusList: ListRadiusExtension.generateCircular(n, cornerRadius));
 
   ///
   /// each [cubicPoints.values] means [cornerPrevious, controlPointA, controlPointB, cornerNext],
-  /// see [FSizeToPath.polygonCubicCorner] for implementation
+  /// see [FPathFromSize.polygonCubicCorner] for implementation
   ///
   @override
   Map<Offset, List<Offset>> get _cubicPointsForEachCorners => corners
@@ -422,11 +557,14 @@ class RRegularPolygonCubicStyleOnEdge extends RRegularPolygon {
       .map((index, current) => MapEntry(
             current,
             [
+              // offset from current corner to previous corner
               OffsetExtension.vectorUnitOf(
                 current,
                 index == 0 ? corners.last : corners[index - 1],
                 timesForEdgeUnit,
               ),
+
+              // offset from current corner to next corner
               OffsetExtension.vectorUnitOf(
                 current,
                 index == n - 1 ? corners.first : corners[index + 1],
@@ -456,15 +594,10 @@ class RRegularPolygonCubicStyleOnEdge extends RRegularPolygon {
   ///
   List<double> get stepsOfCornerRadius => [
         stepCornerRadiusInfiniteBegin,
-        //     v
         stepCornerRadiusPolygon,
-        //     v
         stepCornerRadiusInscribedCircle,
-        //     v
         stepCornerRadiusFragmentFitCorner(),
-        //     v
         stepCornerRadiusArcCrossCenter(),
-        //     v
         stepCornerRadiusInfiniteEnd,
       ];
 
@@ -508,7 +641,7 @@ class RRegularPolygonCubicStyleOnEdge extends RRegularPolygon {
   ///   R = [lengthSide] / tan(c)
   ///
   double stepCornerRadiusFragmentFitCorner({double inset = 0}) =>
-      (lengthSide - inset) / tan(radianCornerCenterSide);
+      (lengthSide - inset) / math.tan(radianCornerCenterSide);
 
   ///
   /// when [inset] = 0 in [stepCornerRadiusArcCrossCenter], it means that all [corners]' PbPd arc crossing on the polygon center,
@@ -526,9 +659,9 @@ class RRegularPolygonCubicStyleOnEdge extends RRegularPolygon {
   double stepCornerRadiusArcCrossCenter({double inset = 0}) => switch (n) {
         3 => radiusCircumscribedCircle * 1.2 - inset,
         4 => radiusCircumscribedCircle * 2.6 - inset,
-        _ =>
-          ((radiusCircumscribedCircle - inset) * cos(radianCornerCenterSide)) /
-              (1 - cos(radianCornerCenterSide)),
+        _ => ((radiusCircumscribedCircle - inset) *
+                math.cos(radianCornerCenterSide)) /
+            (1 - math.cos(radianCornerCenterSide)),
       };
 
   double get stepCornerRadiusInfiniteEnd => double.infinity;
@@ -547,7 +680,7 @@ class Vector {
 
   const Vector(this.direction, this.distance);
 
-  // bool get is2D => direction.hasNoXY;
+  Offset get toOffset => Offset.fromDirection(-direction.dy, distance);
 
   Coordinate get toCoordinate => Coordinate.fromDirection(
         direction: direction,
@@ -558,6 +691,16 @@ class Vector {
 
   @override
   String toString() => "Vector($direction, $distance)";
+
+  static Vector lerp(Vector begin, Vector end, double t) => Vector(
+      Tween(
+        begin: begin.direction,
+        end: end.direction,
+      ).transform(t),
+      Tween(
+        begin: begin.distance,
+        end: end.distance,
+      ).transform(t));
 }
 
 ///
@@ -617,7 +760,7 @@ mixin _CoordinateBase on Offset {
   double get distanceSquared => super.distanceSquared + dz * dz;
 
   @override
-  double get distance => sqrt(distanceSquared);
+  double get distance => math.sqrt(distanceSquared);
 
   double get volume => dx * dy * dz;
 
@@ -723,6 +866,12 @@ mixin _CoordinateBase on Offset {
       '${dz.toStringAsFixed(1)})';
 }
 
+///
+///
+/// See Also [_CoordinateBase]
+///
+///
+
 class Coordinate extends Offset with _CoordinateBase {
   @override
   final double dz;
@@ -749,56 +898,233 @@ class Coordinate extends Offset with _CoordinateBase {
       : dz = 0,
         super(dx, dy);
 
+  const Coordinate.ofYZ(double dy, this.dz) : super(0, dy);
+
+  const Coordinate.ofXZ(double dx, this.dz) : super(dx, 0);
+
   static const Coordinate zero = Coordinate.cube(0);
+
+  static Coordinate maxDistance(Coordinate a, Coordinate b) =>
+      a.distance > b.distance ? a : b;
 
   ///
   ///
-  /// The description below, follows two rule:
-  /// 1. positive radian means counterclockwise.
-  /// 2. radian of "x axis" starts from [Direction3D.back]. radian of y axis, z axis start from [Direction3D.right].
+  /// [Coordinate.transferToTransformOf] transfer from my coordinate system:
+  /// x axis is [Direction3DIn6.left] -> [Direction3DIn6.right], radian start from [Direction3DIn6.back]
+  /// y axis is [Direction3DIn6.front] -> [Direction3DIn6.back], radian start from [Direction3DIn6.left]
+  /// z axis is [Direction3DIn6.bottom] -> [Direction3DIn6.top], radian start from [Direction3DIn6.right]
+  /// (see [Coordinate.fromDirection] for implementation)
   ///
-  /// For example,
-  /// [Offset.fromDirection] axis is [Direction3D.front] -> [Direction3D.back], so the radian "from 0 to 2π" going through
-  /// [Direction3D.right], [Direction3D.bottom], [Direction3D.left], [Direction3D.top], [Direction3D.right] in sequence.
-  ///
-  /// [Matrix4.rotationX] axis is [Direction3D.left] -> [Direction3D.right]
-  /// [Matrix4.rotationY] axis is [Direction3D.top] -> [Direction3D.bottom]
-  /// [Matrix4.rotationZ] axis is [Direction3D.front] -> [Direction3D.back]
-  ///
-  /// by contrast, [Coordinate.fromDirection] is calculated in the definition:
-  /// x axis is [Direction3D.left] -> [Direction3D.right]
-  /// y axis is [Direction3D.back] -> [Direction3D.front]
-  /// z axis is [Direction3D.bottom] -> [Direction3D.top]
-  /// so there is a method helps [Coordinate] translate into the rotation of [Matrix4]
+  /// to dart matrix4 coordinate system (see the comment over [_MationTransformBase] for detail):
+  /// x axis is [Direction3DIn6.left] -> [Direction3DIn6.right], radian start from [Direction3DIn6.back] ?
+  /// y axis is [Direction3DIn6.top] -> [Direction3DIn6.bottom], radian start from [Direction3DIn6.left] ?
+  /// z axis is [Direction3DIn6.front] -> [Direction3DIn6.back], radian start from [Direction3DIn6.right]
   ///
   ///
+  /// See Also:
+  ///   * [Offset.fromDirection], [Coordinate.fromDirection]
+  ///   * [KOffsetDirection], [KCoordinateDirection]
+  ///   * [_MationTransformBase], [MationTransform]
+  ///
+  static Coordinate transferToTransformOf(Coordinate radian) => Coordinate(
+        radian.dx,
+        -radian.dz,
+        -radian.dy,
+      );
+
   factory Coordinate.fromDirection({
     required Coordinate direction,
     required double distance,
     Coordinate scale = KCoordinate.cube_1,
   }) {
-    final dx = direction.dx;
-    final dy = direction.dy;
-    final dz = direction.dz;
-    final point = Coordinate(
-      distance * (cos(dz) * cos(dy)),
-      distance * (-sin(dz) * -cos(dx)),
-      distance * (sin(dx) * sin(dy)),
+    final rX = direction.dx;
+    final rY = direction.dy;
+    final rZ = direction.dz;
+    return Coordinate(
+      distance * (math.cos(rZ) * math.cos(rY)),
+      distance * (math.sin(rZ) * math.cos(rX)),
+      distance * (math.sin(rX) * math.sin(rY)),
     );
-
-    return scale == KCoordinate.cube_1
-        ? point
-        : Coordinate(
-            point.dx * scale.dx,
-            point.dy * scale.dy,
-            point.dz * scale.dz,
-          );
   }
 
-  static Coordinate max(Coordinate a, Coordinate b) => a > b ? a : b;
-
-  static Coordinate maxDistance(Coordinate a, Coordinate b) =>
-      a.distance > b.distance ? a : b;
+  Coordinate scaling(Coordinate scale) =>
+      super.scale(scale.dx, scale.dy, scaleZ: scale.dz);
 
   Coordinate abs() => Coordinate(dx.abs(), dy.abs(), dz.abs());
+}
+
+
+///
+///
+///
+/// extensions
+///
+///
+///
+
+extension AlignmentExtension on Alignment {
+  (double, double) get radianBoundaryForSide => switch (this) {
+    Alignment.center => (0, KRadian.angle_360),
+    Alignment.centerLeft => (-KRadian.angle_90, KRadian.angle_90),
+    Alignment.centerRight => (KRadian.angle_90, KRadian.angle_270),
+    Alignment.topCenter => (0, KRadian.angle_180),
+    Alignment.topLeft => (0, KRadian.angle_90),
+    Alignment.topRight => (KRadian.angle_90, KRadian.angle_180),
+    Alignment.bottomCenter => (KRadian.angle_180, KRadian.angle_360),
+    Alignment.bottomLeft => (KRadian.angle_270, KRadian.angle_360),
+    Alignment.bottomRight => (KRadian.angle_180, KRadian.angle_270),
+    _ => throw UnimplementedError(),
+  };
+
+  double get radianRangeForSide {
+    final boundary = radianBoundaryForSide;
+    return boundary.$2 - boundary.$1;
+  }
+
+  double radianRangeForSideStepOf(int count) =>
+      radianRangeForSide / (this == Alignment.center ? count : count - 1);
+
+  Generator<double> directionOfSideSpace(bool isClockwise, int count) {
+    final boundary = radianBoundaryForSide;
+    final origin = isClockwise ? boundary.$1 : boundary.$2;
+    final step = radianRangeForSideStepOf(count);
+
+    return isClockwise
+        ? (index) => origin + step * index
+        : (index) => origin - step * index;
+  }
+
+  Mapper<Widget> get deviateBuilder {
+    Row rowOf(List<Widget> children) => Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: children,
+    );
+
+    final rowBuilder = switch (x) {
+      0 => (child) => rowOf([child]),
+      1 => (child) => rowOf([child, KSizedBox.expand]),
+      -1 => (child) => rowOf([KSizedBox.expand, child]),
+      _ => throw UnimplementedError(),
+    };
+
+    Column columnOf(List<Widget> children) => Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: children,
+    );
+
+    final columnBuilder = switch (y) {
+      0 => (child) => columnOf([child]),
+      1 => (child) => columnOf([rowBuilder(child), KSizedBox.expand]),
+      -1 => (child) => columnOf([KSizedBox.expand, rowBuilder(child)]),
+      _ => throw UnimplementedError(),
+    };
+
+    return (child) => columnBuilder(child);
+  }
+}
+
+extension PositionedExtension on Positioned {
+  Rect? get rect =>
+      (left == null || top == null || width == null || height == null)
+          ? null
+          : Rect.fromLTWH(left!, top!, width!, height!);
+}
+
+extension Matrix4Extension on Matrix4 {
+  Matrix4 scaledCoordinate(Coordinate coordinate) => scaled(
+    coordinate.dx,
+    coordinate.dy,
+    coordinate.dz,
+  );
+
+  void rotateCoordinate(Coordinate coordinate) => this
+    ..rotateX(coordinate.dx)
+    ..rotateY(coordinate.dy)
+    ..rotateZ(coordinate.dz);
+
+  void translateCoordinate(Coordinate coordinate) =>
+      translate(coordinate.dx, coordinate.dy, coordinate.dz);
+
+  ///
+  /// perspective
+  ///
+
+  void setPerspective(double perspective) => setEntry(3, 2, perspective);
+
+  void setDistance(double? distance) =>
+      setPerspective(distance == null ? 0 : 1 / distance);
+
+  double entryPerspective() => entry(3, 2);
+
+  void copyPerspectiveFrom(Matrix4 matrix4) =>
+      setPerspective(matrix4.entryPerspective());
+
+  static Matrix4 identityPerspectiveOf(Matrix4 matrix4) =>
+      Matrix4.identity()..copyPerspectiveFrom(matrix4);
+}
+
+extension PathExtension on Path {
+  /// move, line
+  void moveToPoint(Offset point) => moveTo(point.dx, point.dy);
+
+  void lineToPoint(Offset point) => lineTo(point.dx, point.dy);
+
+  void moveOrLineToPoint(bool shouldMove, Offset point) =>
+      shouldMove ? moveToPoint(point) : lineToPoint(point);
+
+  void connect(Offset a, Offset b) => this
+    ..moveToPoint(a)
+    ..lineToPoint(b);
+
+  /// add oval, rect
+  void addOvalFromCircle(Offset center, double radius) =>
+      addOval(Rect.fromCircle(center: center, radius: radius));
+
+  void addRectFromPoints(Offset a, Offset b) => addRect(Rect.fromPoints(a, b));
+
+  void addRectFromCenter(Offset center, double width, double height) =>
+      addRect(Rect.fromCenter(center: center, width: width, height: height));
+
+  void addRectFromLTWH(double left, double top, double width, double height) =>
+      addRect(Rect.fromLTWH(left, top, width, height));
+
+  void quadraticBezierToPoint(Offset controlPoint, Offset endPoint) =>
+      quadraticBezierTo(
+        controlPoint.dx,
+        controlPoint.dy,
+        endPoint.dx,
+        endPoint.dy,
+      );
+
+  /// see https://www.youtube.com/watch?v=aVwxzDHniEw for explanation of cubic bezier
+  void cubicToPoint(
+      Offset controlPoint1,
+      Offset controlPoint2,
+      Offset endPoint,
+      ) =>
+      cubicTo(
+        controlPoint1.dx,
+        controlPoint1.dy,
+        controlPoint2.dx,
+        controlPoint2.dy,
+        endPoint.dx,
+        endPoint.dy,
+      );
+
+  /// the [points] will be treated as [controlPointA, controlPointB, endPoint]
+  void cubicToPointsList(List<Offset> points) =>
+      cubicToPoint(points[0], points[1], points[2]);
+}
+
+extension PathOperationExtension on PathOperation {
+  Translator<Size, Path> operateSizeToPath(
+      Translator<Size, Path> spA,
+      Translator<Size, Path> spB,
+      ) =>
+          (size) => Path.combine(this, spA(size), spB(size));
+
+  Translator<Size, Path> operateSizeToPathAll(
+      Iterable<Translator<Size, Path>> sps,
+      ) =>
+      sps.reduce((sp, spNext) => operateSizeToPath(sp, spNext));
 }

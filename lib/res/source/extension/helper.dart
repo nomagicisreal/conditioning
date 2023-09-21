@@ -2,98 +2,91 @@ part of source;
 
 ///
 /// this file contains:
-/// [TweenTargetAbleMixin]
-/// [TweenDouble]
+/// [DurationFR]
+/// [CurveFR]
 ///
-/// [MyTween]
-/// [VectorTween]
-/// [PathTween], [PathTraceTween]
-/// [RRegularPolygonTween]
+/// [Between]
+/// [BetweenPath]
+/// [BetweenRRegularPolygon]
 ///
 /// [MyCurve]
-/// [MyOverlayEntry]
-/// [MyStreamController]
-/// [MyPainter]
 /// [MyClipper]
+/// [MyPainter]
+/// [MyOverlay]
 ///
-/// the helpers for my origin widgets:
+/// the helpers for building widgets:
+/// [FabExpandableSetup]
 /// [Leader], [Follower], [FollowerState]
-/// [PesItem], [PesState]
+///
+/// TODO:
+/// [AnimatedListModification], [AnimatedListItem]
 ///
 ///
 
-/// TODO: transfer mixin to enable every subclass of [MyTween].
-class TweenTargetAbleMixin<T> extends MyTween<T> {
-  TweenTargetAbleMixin._({
-    required super.begin,
-    required super.end,
-    required super.onLerp,
-  });
+class DurationFR {
+  final Duration forward;
+  final Duration reverse;
 
-  factory TweenTargetAbleMixin.targets({
-    required T begin,
-    required T end,
-    required Iterable<T> intervals,
-  }) {
-    T current = begin;
-    final tweens = intervals.map((target) {
-      final previous = current;
-      current = target;
-      return Tween(begin: previous, end: current);
-    }).toList()
-      ..add(Tween(begin: current, end: end))
-      ..toList(growable: false);
+  const DurationFR(this.forward, this.reverse);
 
-    final piece = 1 / tweens.length;
+  const DurationFR.constant(Duration duration)
+      : forward = duration,
+        reverse = duration;
 
-    int index = 0;
-
-    return TweenTargetAbleMixin._(
-      begin: begin,
-      end: end,
-      onLerp: (t) {
-        if (t > (index + 1) * piece) {
-          index++;
-        }
-        return tweens[index].transform(t);
-      },
-    );
-  }
+  DurationFR operator ~/(int value) => DurationFR(
+        forward ~/ value,
+        reverse ~/ value,
+      );
 }
 
 class CurveFR {
   final Curve forward;
-  final CurveMapper reverseMapper;
+  final Curve? _reverse;
+  final Mapper<Curve>? _reverseMapper;
 
-  Curve get reverse => reverseMapper(forward);
+  Curve get reverse => _reverse ?? _reverseMapper!(forward);
 
   const CurveFR(
+    this.forward,
+    Curve reverse,
+  )   : _reverse = reverse,
+        _reverseMapper = null;
+
+  const CurveFR.constant(Curve curve)
+      : forward = curve,
+        _reverse = curve,
+        _reverseMapper = null;
+
+  CurveFR.constantInterval(double begin, double end, CurveFR curve)
+      : forward = Interval(begin, end, curve: curve.forward),
+        _reverse = Interval(begin, end, curve: curve.reverse),
+        _reverseMapper = null;
+
+  CurveFR.fromMapper(
     this.forward, {
-    this.reverseMapper = KCurveMapper.flipped,
-  });
+    Mapper<Curve>? reverseMapper = KMapper.curveFlipped,
+  })  : _reverseMapper = reverseMapper,
+        _reverse = null;
+
+  CurveFR get flipped => CurveFR.fromMapper(reverse);
 }
 
-class MyTween<T> extends Tween<T> {
+///
+///
+/// [Between.constant]
+/// [Between.sequence]
+///
+/// [_onLerp]
+/// [_onLerpConstant]
+///
+/// [reverse]
+/// [follow]
+///
+///
+
+class Between<T> extends Tween<T> {
   final OnLerp<T> onLerp;
   final CurveFR curve;
-
-  static OnLerp<T> _transform<T>(Tween<T> tween) => (t) => tween.transform(t);
-
-  static OnLerp<T> _constantOf<T>(T value) => (_) => value;
-
-  MyTween({
-    this.curve = KCurveFRFlipped.fastOutSlowIn,
-    OnLerp<T>? onLerp,
-    required T begin,
-    required T end,
-  })  : onLerp = onLerp ?? _transform(Tween(begin: begin, end: end)),
-        super(begin: begin, end: end);
-
-  MyTween.constant(
-    T value, {
-    this.curve = KCurveFRFlipped.fastOutSlowIn,
-  })  : onLerp = _constantOf<T>(value),
-        super(begin: value, end: value);
 
   @override
   T get begin => super.begin!;
@@ -112,126 +105,150 @@ class MyTween<T> extends Tween<T> {
         reverseCurve: curve.reverse,
       ));
 
-  MyTween<T> follow(T next) => MyTween<T>(begin: end, end: next, curve: curve);
+  Between({
+    this.curve = KCurveFR.fastOutSlowIn,
+    OnLerp<T>? onLerp,
+    required T super.begin,
+    required T super.end,
+  }) : onLerp = onLerp ?? FOnLerp.of(begin, end);
 
-  MyTween<T> get reverse => MyTween(begin: end, end: begin, curve: curve);
-}
+  Between.constant(
+    T value, {
+    this.curve = KCurveFR.fastOutSlowIn,
+  })  : onLerp = FOnLerp.constant(value),
+        super(begin: value, end: value);
 
-class TweenDouble extends MyTween<double> {
-  TweenDouble._({
-    required super.begin,
-    required super.end,
-    required super.curve,
-  }) : super(onLerp: KDoubleMapper.none);
+  factory Between.sequence({
+    CurveFR curve = KCurveFR.linear,
+    required bool isElementCurveForward,
+    required T begin,
+    required Iterable<(double, T, CurveFR)> intervals, // weight, value, curve
+  }) {
+    T current = begin;
 
-  factory TweenDouble.constant(
-    double value, {
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
-    double infinityPrecision = 1,
-  }) =>
-      TweenDouble._(
+    final curveOf = isElementCurveForward
+        ? (CurveFR curve) => CurveTween(curve: curve.forward)
+        : (CurveFR curve) => CurveTween(curve: curve.reverse);
+
+    final list = intervals.isEmpty
+        ? [TweenSequenceItem(tween: Between.constant(begin), weight: 1.0)]
+        : intervals.mapToList((interval) {
+            final previous = current;
+            current = interval.$2;
+            return TweenSequenceItem(
+              tween: Between(begin: previous, end: current)
+                  .chain(curveOf(interval.$3)),
+              weight: interval.$1,
+            );
+          });
+
+    return Between(
+      curve: curve,
+      begin: begin,
+      end: list.last.tween.transform(1.0),
+      onLerp: TweenSequence(list).transform,
+    );
+  }
+
+  Between<T> get reverse => Between(
+        begin: end,
+        end: begin,
+        onLerp: onLerp,
         curve: curve,
-        begin: value.filterInfinity(infinityPrecision),
-        end: value.filterInfinity(infinityPrecision),
       );
 
-  factory TweenDouble({
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
-    double infinityPrecision = 1,
-    required double begin,
-    required double end,
-  }) =>
-      TweenDouble._(
+  ///
+  /// follow
+  ///
+
+  Between<T> follow(T next) =>
+      Between<T>(begin: end, end: next, onLerp: onLerp, curve: curve);
+
+  Between<T> followPlus(T next) => Between<T>(
+        begin: end,
+        end: Operator.plus.operationOf(end, next),
+        onLerp: onLerp,
         curve: curve,
-        begin: begin.filterInfinity(infinityPrecision),
-        end: end.filterInfinity(infinityPrecision),
+      );
+
+  Between<T> followMinus(T next) => Between<T>(
+        begin: end,
+        end: Operator.minus.operationOf(end, next),
+        onLerp: onLerp,
+        curve: curve,
+      );
+
+  Between<T> followMultiply(T next) => Between<T>(
+        begin: end,
+        end: Operator.multiply.operationOf(end, next),
+        onLerp: onLerp,
+        curve: curve,
+      );
+
+  Between<T> followDivide(T next) => Between<T>(
+        begin: end,
+        end: Operator.divide.operationOf(end, next),
+        onLerp: onLerp,
+        curve: curve,
       );
 }
 
-class VectorTween extends MyTween<Vector> {
-  VectorTween._({
+class BetweenPath<T> extends Between<Translator<Size, Path>> {
+  BetweenPath._({
     required super.begin,
     required super.end,
     required super.onLerp,
     required super.curve,
   });
 
-  factory VectorTween.ofDirectionDistance(
-    Tween<Coordinate> direction,
-    Tween<double> distance, {
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
-  }) =>
-      VectorTween._(
-        begin: Vector(direction.begin!, distance.begin!),
-        end: Vector(direction.end!, distance.end!),
-        onLerp: (t) => Vector(direction.transform(t), distance.transform(t)),
-        curve: curve,
-      );
+  BetweenPath.constant(
+    Translator<Size, Path> path, {
+    CurveFR curve = KCurveFR.fastOutSlowIn,
+  }) : super(begin: path, end: path, onLerp: (t) => path, curve: curve);
 
-  factory VectorTween({
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
-    required Vector begin,
-    required Vector end,
-  }) =>
-      VectorTween.ofDirectionDistance(
-        Tween(begin: begin.direction, end: end.direction),
-        Tween(begin: begin.distance, end: end.distance),
-        curve: curve,
-      );
-}
-
-class PathTween<T> extends MyTween<SizeToPath> {
-  PathTween.constant(
-    SizeToPath builder, {
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
+  BetweenPath.fromTween(
+    Between<T> tween, {
+    CurveFR curve = KCurveFR.fastOutSlowIn,
+    required OnLerpPath<T> lerp,
   }) : super(
-          begin: builder,
-          end: builder,
-          onLerp: (t) => builder,
+          begin: lerp(tween.begin),
+          end: lerp(tween.end),
+          onLerp: (t) => lerp(tween.transform(t)),
           curve: curve,
         );
 
-  PathTween.fromTween(
-    MyTween<T> tween, {
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
-    required PathPlan<T> plan,
+  BetweenPath.fromTweenList(
+    List<Between<T>> list, {
+    CurveFR curve = KCurveFR.fastOutSlowIn,
+    required OnLerpPath<List<T>> lerp,
   }) : super(
-          begin: plan(tween.begin),
-          end: plan(tween.end),
-          onLerp: (t) => plan(tween.transform(t)),
-          curve: curve,
-        );
-
-  PathTween.fromTweenList(
-    List<MyTween<T>> list, {
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
-    required PathPlan<List<T>> plan,
-  }) : super(
-          begin: plan(list.map((e) => e.begin).toList(growable: false)),
-          end: plan(list.map((e) => e.end).toList(growable: false)),
-          onLerp: (t) => plan(
+          begin: lerp(list.map((e) => e.begin).toList(growable: false)),
+          end: lerp(list.map((e) => e.end).toList(growable: false)),
+          onLerp: (t) => lerp(
             list.map((e) => e.transform(t)).toList(growable: false),
           ),
           curve: curve,
         );
-}
 
-class PathTraceTween extends MyTween<SizeToPath> {
-  PathTraceTween._({
-    required super.curve,
-    required super.begin,
-    required super.end,
-    required super.onLerp,
-  });
+  BetweenPath.fromShapeBorder(
+    Between<ShapeBorder> shape, {
+    CurveFR curve = KCurveFR.fastOutSlowIn,
+    OnLerpPath<ShapeBorder> lerp = FOnLerpPath.shapeOuterLtr,
+  }) : super(
+          begin: lerp(shape.begin),
+          end: lerp(shape.end),
+          onLerp: (t) => lerp(shape.onLerp(t)),
+          curve: curve,
+        );
 
-  factory PathTraceTween.fromOffsetRightBefore({
-    CurveFR curve = KCurveFRFlipped.fastOutSlowIn,
+  factory BetweenPath.dynamicTrace({
     Offset start = Offset.zero,
+    CurveFR curve = KCurveFR.fastOutSlowIn,
     required Tween<Offset> point,
-    required PathPlan<List<Offset>> plan,
+    required OnLerpPath<List<Offset>> plan,
   }) {
     Offset current = start;
-    return PathTraceTween._(
+    return BetweenPath._(
       begin: plan([current, point.begin!].toList(growable: false)),
       end: plan([current, point.end!].toList(growable: false)),
       onLerp: (t) {
@@ -244,147 +261,101 @@ class PathTraceTween extends MyTween<SizeToPath> {
   }
 }
 
-class RRegularPolygonTween extends PathTween<double> {
-  RRegularPolygonTween._({
-    required List<TweenDouble> tweenList,
-    required PathPlan<List<double>> polygonPlan,
-  }) : super.fromTweenList(tweenList, plan: polygonPlan);
+class BetweenRRegularPolygon extends BetweenPath<double> {
+  BetweenRRegularPolygon._({
+    required List<Between<double>> tweenList,
+    required OnLerpPath<List<double>> polygonPlan,
+    required CurveFR curve,
+  }) : super.fromTweenList(tweenList, lerp: polygonPlan, curve: curve);
 
   ///
-  /// to set the proper [edgeVectorTimes], see [RRegularPolygonCubicStyleOnEdge.timesForEdge]
-  /// to set the proper [cornerRadius], see [RRegularPolygonCubicStyleOnEdge.cornerRadius]
+  /// to set the proper [edgeVectorTimes], see [RRegularPolygonCubicOnEdge.timesForEdge]
+  /// to set the proper [cornerRadius], see [RRegularPolygonCubicOnEdge.cornerRadius]
   ///
-  factory RRegularPolygonTween.cubicStyleOnEdge({
+  factory BetweenRRegularPolygon({
     bool invertFromSize = false,
-    TweenDouble? edgeVectorTimes,
-    TweenDouble? scale,
-    required TweenDouble cornerRadius,
-    required RRegularPolygonCubicStyleOnEdge polygon,
+    Between<double>? edgeVectorTimes,
+    Between<double>? scale,
+    MapperWith<List<Offset>, Size> transform =
+        FOffsetListWithSize.transformPointsToSizeCenter,
+    CurveFR curve = KCurveFR.fastOutSlowIn,
+    required Between<double> cornerRadius,
+    required RRegularPolygon polygon,
   }) =>
-      RRegularPolygonTween._(
+      BetweenRRegularPolygon._(
         tweenList: [
-          scale ?? VTweenDouble.k1,
-          edgeVectorTimes ?? VTweenDouble.zero,
+          scale ?? FBetweenDouble.k1,
+          edgeVectorTimes ?? FBetweenDouble.zero,
           cornerRadius,
         ],
-        polygonPlan: (values) => FSizeToPath.polygonCubicCorner(
-          (polygon
-                ..timesForEdge = values[1]
-                ..cornerRadius = values[2])
-              .cubicPoints,
-          invertFromSize: invertFromSize,
-          scale: values[0],
-        ),
+        polygonPlan: switch (polygon) {
+          RRegularPolygonCubicOnEdge() => (values) =>
+              FPathFromSize.polygonCubicCornerFromSize(
+                (polygon
+                      ..timesForEdge = values[1]
+                      ..cornerRadius = values[2])
+                    .cubicPoints,
+                invertFromSize: invertFromSize,
+                scale: values[0],
+                transform: transform,
+              ),
+        },
+        curve: curve,
       );
 }
 
+///
+///
+///
+/// curve
+///
+///
+///
+
 class MyCurve extends Curve {
-  final DoubleMapper mapper;
+  final Mapper<double> mapper;
 
   const MyCurve(this.mapper);
+
+  MyCurve.sinPeriodOf(int times)
+      : mapper = FMapperDouble.sinFromPeriod(times.toDouble());
 
   @override
   double transformInternal(double t) => mapper(t);
 }
 
-///
-/// see [CustomOverlayState] for mor implementation
-///
-class MyOverlayEntry {
-  final Key? key;
-  final OverlayEntry overlayEntry;
-  AnimationController? controller;
+class MyClipper extends CustomClipper<Path> {
+  final Translator<Size, Path> sizeToPath;
+  final bool Function(MyClipper oldClipper, MyClipper clipper) shouldReClip;
 
-  MyOverlayEntry._({
-    this.key,
-    required this.overlayEntry,
-  });
+  @override
+  Path getClip(Size size) => sizeToPath(size);
 
-  static MyOverlayEntry _centerSizedOrNot({
-    required Key? key,
-    required Size? centerSized,
-    required WidgetBuilder builder,
-  }) =>
-      MyOverlayEntry._(
-        key: key,
-        overlayEntry: OverlayEntry(
-          builder: centerSized == null
-              ? builder
-              : (context) => Center(
-                    child: SizedBox(
-                      width: centerSized.width,
-                      height: centerSized.height,
-                      child: builder(context),
-                    ),
-                  ),
-        ),
-      );
+  @override
+  bool shouldReclip(MyClipper oldClipper) => shouldReClip(oldClipper, this);
 
-  factory MyOverlayEntry({
-    Key? key,
-    Size? centerSized,
-    required WidgetBuilder builder,
-  }) =>
-      _centerSizedOrNot(
-        key: key,
-        centerSized: centerSized,
-        builder: builder,
-      );
+  static bool _reClipWhenDiff(MyClipper oldClipper, MyClipper clipper) =>
+      oldClipper.sizeToPath != clipper.sizeToPath;
 
-  factory MyOverlayEntry.ofAni({
-    Key? key,
-    Size? centerSized,
-    required AniBuilder builder,
-  }) {
-    late final MyOverlayEntry entry;
-    late final AnimationController controller;
+  static bool _reClipNever(MyClipper oldClipper, MyClipper clipper) => false;
 
-    entry = _centerSizedOrNot(
-      key: key,
-      centerSized: centerSized,
-      builder: (context) {
-        final ani = builder(context);
-        controller = MyAnimation.of(context).animationController;
-        return ani;
-      },
-    );
+  const MyClipper.reClipOf(this.sizeToPath) : shouldReClip = _reClipWhenDiff;
 
-    // TODO: no yet build before entry insert
-    entry.controller = controller;
-
-    return entry;
-  }
-}
-
-class MyStreamController<T> {
-  MyStreamController._() : controller = StreamController<T>();
-
-  StreamController<T> controller;
-
-  void add(T element) => controller.add(element);
-
-  void close() => controller.close();
-
-  Stream<T> get stream => controller.stream;
+  const MyClipper.reClipNeverOf(this.sizeToPath) : shouldReClip = _reClipNever;
 }
 
 class MyPainter extends CustomPainter {
-  final CanvasSizeToPaint canvasSizeToPaint;
-  final SizeToPath sizeToPath;
-  final CanvasListener canvasListener;
+  final PaintFromCanvasSize paintFromCanvasSize;
+  final Translator<Size, Path> sizeToPath;
+  final CanvasProcessor canvasListener;
   final bool Function(MyPainter oldPainter, MyPainter painter) _shouldRePaint;
 
-  const MyPainter.rePaintOf({
-    this.canvasListener = FCanvasListener.drawPathWithPaint,
-    required this.sizeToPath,
-    required this.canvasSizeToPaint,
-  }) : _shouldRePaint = _rePaintWhenDiff;
-
-  const MyPainter.rePaintNever({
-    this.canvasListener = FCanvasListener.drawPathWithPaint,
-    required this.canvasSizeToPaint,
-    required this.sizeToPath,
-  }) : _shouldRePaint = _rePaintNever;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = paintFromCanvasSize(canvas, size);
+    final path = sizeToPath(size);
+    canvasListener(canvas, paint, path);
+  }
 
   @override
   bool shouldRepaint(MyPainter oldDelegate) =>
@@ -400,44 +371,225 @@ class MyPainter extends CustomPainter {
 
   @override
   int get hashCode => Object.hash(
-        canvasSizeToPaint.hashCode,
+        paintFromCanvasSize.hashCode,
         sizeToPath.hashCode,
         canvasListener.hashCode,
       );
 
-  /// paint
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = canvasSizeToPaint(canvas, size);
-    final path = sizeToPath(size);
-    canvasListener(canvas, paint, path);
+  const MyPainter.rePaintOf({
+    this.canvasListener = FCanvasProcessor.drawPathWithPaint,
+    required this.sizeToPath,
+    required this.paintFromCanvasSize,
+  }) : _shouldRePaint = _rePaintWhenDiff;
+
+  const MyPainter.rePaintNever({
+    this.canvasListener = FCanvasProcessor.drawPathWithPaint,
+    required this.paintFromCanvasSize,
+    required this.sizeToPath,
+  }) : _shouldRePaint = _rePaintNever;
+}
+
+class MyOverlay {
+  MyOverlay();
+
+  List<OverlayEntry> entries = [];
+
+  ///
+  /// it seems that if passing variables to static method, the arguments won't update when [OverlayEntry.markNeedsBuild].
+  /// instead of assigning all variables to static arguments in here directly,
+  /// it's necessary to have [Caller] as arguments calling variables.
+  ///
+  /// See Also:
+  ///   * [addFadingEntry]
+  ///
+  static OverlayEntry fadeInDecide<S>({
+    bool opaque = false,
+    bool maintainState = false,
+    CurveFR curve = KCurveFR.linear,
+    DurationFR duration = KDurationFR.second1,
+    AnimatingProcessor onAnimating = FOnAnimatingProcessor.nothing,
+    AnimationStatusListener initialStatusListener =
+        FAnimationStatusListener.listenNothing,
+    required Decider<AnimationController, S> updateDecide,
+    required Caller<S> shouldDecide,
+    required WidgetBuilder builder,
+  }) =>
+      OverlayEntry(
+        opaque: opaque,
+        maintainState: maintainState,
+        builder: (context) => MyAnimation(
+          ani: Ani.initForward(
+            duration: duration,
+            initialStatusListener: initialStatusListener,
+            updateProcess: updateDecide(shouldDecide()),
+            onAnimating: onAnimating,
+          ),
+          mation: MationTransitionDouble.fadeIn(curve: curve),
+          child: builder(context),
+        ),
+      );
+
+  void addFadingEntry({
+    bool isDecideToFadeOutAndRemoveWhenDismissed = true,
+    bool opaque = false,
+    bool maintainState = false,
+    CurveFR curve = KCurveFR.linear,
+    DurationFR duration = KDurationFR.milli300,
+    AnimatingProcessor onAnimating = FOnAnimatingProcessor.nothing,
+    required BuildContext context,
+    required Caller<bool> shouldFadeOut,
+    required WidgetBuilder builder,
+  }) {
+    if (isDecideToFadeOutAndRemoveWhenDismissed) {
+      late final OverlayEntry entry;
+      void remove() => entry.remove();
+      entry = MyOverlay.fadeInDecide<bool>(
+        duration: duration,
+        initialStatusListener: FAnimationStatusListener.dismissedListen(remove),
+        updateDecide: FAni.decideReverse,
+        shouldDecide: shouldFadeOut,
+        onAnimating: onAnimating,
+        builder: builder,
+      );
+      entries.add(entry..insert(context));
+    } else {
+      throw UnimplementedError();
+    }
+  }
+
+  ///
+  /// [removeLast] is really "remove" only if the entry is added by [addFadingEntry],
+  /// or other entry that will be removed after rebuild
+  ///
+  void removeLast() {
+    try {
+      entries.last.markNeedsBuild();
+      entries.removeLast();
+    } catch (noElement) {
+      return;
+    }
   }
 }
 
-class MyClipper extends CustomClipper<Path> {
-  final SizeToPath sizeToPath;
-  final bool Function(MyClipper oldClipper, MyClipper clipper) shouldReClip;
+///
+///
+///
+///
+///
+/// origin classes
+///
+///
+///
+///
+///
+///
 
-  const MyClipper.reClipOf(this.sizeToPath) : shouldReClip = _reClipWhenDiff;
+///
+/// See also:
+/// [FabExpandable]
+///
+class FabExpandableSetup {
+  final Rect positioned;
+  final Alignment alignment;
+  final DurationFR duration;
+  final Decider<AnimationController, bool> updateHear;
+  final Generator<MationBase> mationsGenerator;
+  final List<(Icon, VoidCallback)> icons;
 
-  const MyClipper.reClipNeverOf(this.sizeToPath) : shouldReClip = _reClipNever;
+  Ani aniOf(bool isOpen) => Ani.initForward(
+        duration: duration,
+        updateProcess: updateHear(isOpen),
+        onAnimating: FOnAnimatingProcessor.back,
+      );
 
-  @override
-  bool shouldReclip(MyClipper oldClipper) => shouldReClip(oldClipper, this);
+  FabExpandableSetup._({
+    required this.positioned,
+    required this.alignment,
+    required this.duration,
+    required this.updateHear,
+    required this.mationsGenerator,
+    required this.icons,
+  });
 
-  static bool _reClipWhenDiff(MyClipper oldClipper, MyClipper clipper) =>
-      oldClipper.sizeToPath != clipper.sizeToPath;
+  factory FabExpandableSetup.orbitOnOpenIcon({
+    double distance = 2,
+    double maxElementsIconSize = 24,
+    DurationFR duration = KDurationFR.milli800,
+    CurveFR curve = KCurveFR.fastOutSlowIn_easeOutQuad,
+    Decider<AnimationController, bool> updateHear = FAni.decideForwardOrReverse,
+    Processor<Mations<dynamic, Mation>> mationsListener = kMationsProcessor,
+    required BuildContext context,
+    required Rect openIconRect,
+    required Generator<double> direction,
+    required List<(Icon, VoidCallback)> icons,
+  }) {
+    final maxElementsIconSize = icons.maxSizeOf(context);
+    return FabExpandableSetup._(
+      positioned: RectExtension.fromCircle(
+        openIconRect.center,
+        maxElementsIconSize * (1 + 2 * distance),
+      ),
+      alignment: Alignment.center,
+      duration: duration,
+      updateHear: updateHear,
+      mationsGenerator: (index) => Mations<dynamic, Mation>([
+        MationTransitionDouble.fade(0, 1, curve: curve),
+        MationTransitionOffset.ofDirection(
+          direction(index),
+          (0, distance),
+          curve: CurveFR.constantInterval(0.2 * index, 1.0, curve),
+        ),
+      ])
+        ..configure(mationsListener),
+      icons: icons,
+    );
+  }
 
-  static bool _reClipNever(MyClipper oldClipper, MyClipper clipper) => false;
-
-  @override
-  Path getClip(Size size) => sizeToPath(size);
+  factory FabExpandableSetup.line({
+    double distance = 1.2,
+    DurationFR duration = KDurationFR.milli800,
+    CurveFR curve = KCurveFR.ease,
+    Decider<AnimationController, bool> updateHear = FAni.decideForwardOrReverse,
+    Processor<Mations<dynamic, Mation>> mationsListener = kMationsProcessor,
+    required BuildContext context,
+    required Rect openIconRect,
+    required Direction2DIn8 direction,
+    required List<(Icon, VoidCallback)> icons,
+  }) {
+    final maxElementsIconSize = icons.maxSizeOf(context);
+    return FabExpandableSetup._(
+      positioned: openIconRect.expandToIncludeDirection(
+        direction: direction,
+        width: maxElementsIconSize * 2,
+        length: maxElementsIconSize * 2 * distance * icons.length,
+      ),
+      alignment: direction.flipped.toAlignment,
+      duration: duration,
+      updateHear: updateHear,
+      mationsGenerator: (index) => Mations<dynamic, Mation>([
+        MationTransitionOffset(
+          Offset.zero,
+          direction.toOffset * distance * (index + 1).toDouble(),
+        ),
+        MationTransitionDouble.scale(
+          0.0,
+          1.0,
+          curve: CurveFR.constantInterval(0.2 * index, 1.0, curve),
+        ),
+      ]),
+      icons: icons,
+    );
+  }
 }
 
 ///
-/// to see how [Leader], [Follower] work, see [LeaderShip] for implementation
 ///
-
+///
+///
+/// See Also:
+/// [LeaderShip]
+///
+///
 class Leader {
   final Key? key;
   final LayerLink link;
@@ -469,7 +621,7 @@ class Follower {
   final Alignment anchorOnFollower;
   final Widget child;
 
-  MyOverlayEntry? overlayEntryController;
+  OverlayEntry? overlayEntry;
 
   Follower({
     this.key,
@@ -493,34 +645,41 @@ class Follower {
         child: child,
       );
 
-  MyOverlayEntry getOverlayEntryController(BuildContext leaderContext) {
-    overlayEntryController = MyOverlayEntry(
-      builder: (context) => toCompositedTransformFollower,
-      centerSized: leaderContext.renderBox.size,
+  OverlayEntry overlayEntryOf(BuildContext leaderContext) {
+    overlayEntry = OverlayEntry(
+      builder: (context) =>
+          SizedBox.fromSize(size: leaderContext.renderBox.size),
     );
-    return overlayEntryController!;
+    return overlayEntry!;
   }
 }
 
-///
-/// to see how [PesState] and [PesItem] work, see [PesPen] for implementation
-///
+class AnimatedListModification {
+  final AnimatedListItemPlan itemPlan;
+  final AnimatedListItemIndexCreator index;
+  final AnimatedListItemInsertProcessor insert;
+  final AnimatedListItemUpdateProcessor remove;
+  final AnimatedListItemUpdateProcessor onTap;
 
-enum PesState {
-  inPool,
-  inPosition,
-  expand,
-  shrink,
+  // final AnimatedListItemUpdate onDrag;
+  // final AnimatedListItemUpdate onPress;
+  // final AnimatedListItemUpdate onPressLong;
+
+  const AnimatedListModification({
+    this.itemPlan = FListAnimatedItemBuilder.plan1,
+    this.index = FListAnimatedItemListener.index0,
+    this.insert = FListAnimatedItemListener.insert0,
+    this.remove = FListAnimatedItemListener.remove0,
+    this.onTap = FListAnimatedItemListener.onTap0,
+  });
+
+  static const instance = AnimatedListModification();
 }
 
-class PesItem<A> {
-  final Offset itemZeroOffset;
-  final Size itemSize;
-  final A item;
+class AnimatedListItem {
+  final String data;
 
-  const PesItem({
-    required this.itemZeroOffset,
-    required this.itemSize,
-    required this.item,
+  const AnimatedListItem({
+    required this.data,
   });
 }

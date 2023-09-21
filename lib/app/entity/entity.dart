@@ -1,15 +1,18 @@
-part of data;
+part of app;
 
 ///
 /// topic, field, board, realm...
 ///
+/// entity is more data specific than model in here
+///
 
-enum EntityType {
-  messagingUser;
+sealed class Entity {
+  const Entity();
+  static const List<String> typeList = [];
 }
 
 @immutable
-abstract class MessagingUser {
+abstract class MessagingUser extends Entity {
   final String id;
   final String email;
   final String? name;

@@ -1,18 +1,31 @@
+// ignore_for_file: constant_identifier_names
+
 part of source;
 
 ///
 /// this file contains:
-///
 /// [KStringAssetImage]
 /// [KStringAssetFontFamily]
 ///
+/// [KIconCupertinoIcons]
 /// [VGoogleFontsMono]
 /// [VLaTexFontStyle]
+/// [KTableCalendarStyle]
 ///
 ///
 
 extension KStringAssetImage on String {
   static const String wallpaper = "lib/wallpaper.jpg";
+  static const String logo_discord = "assets/logo/Discord.png";
+  static const String logo_instagram = "assets/logo/Instagram.png";
+  static const String logo_line = "assets/logo/LINE.png";
+  static const String logo_notion = "assets/logo/Notion.png";
+  static const String logo_timetree = "assets/logo/Timetree.png";
+  static const String logo_youtube = "assets/logo/Youtube.png";
+  static const String logo_pokemon = "assets/logo/Pokemon.png";
+  static const String logo_maumiwar = "assets/logo/Maumiwar.png";
+  static const String talunity_qr = "assets/talunity_qr.png";
+  static const String talunity_recruitmentForm = "assets/talunity_recruitmentForm.png";
 }
 
 extension KStringAssetFontFamily on String {
@@ -25,8 +38,13 @@ extension KStringAssetFontFamily on String {
 extension KStringAssetMusic on String {
   static const String thatsTheWayLoveGoes =
       "music/JanetJackson_ThatsTheWayLoveGoes.wav";
-  static const String river =
-      "music/River.wav";
+  static const String river = "music/River.wav";
+}
+
+extension KIconCupertinoIcons on Icon {
+  static const plus = Icon(CupertinoIcons.plus);
+  static const equal = Icon(CupertinoIcons.equal);
+  static const question = Icon(CupertinoIcons.question);
 }
 
 //
@@ -71,3 +89,15 @@ extension KStringAssetMusic on String {
 //   static TeXViewFontStyle size_20 = TeXViewFontStyle(fontSize: 20);
 //   static TeXViewFontStyle size_30 = TeXViewFontStyle(fontSize: 30);
 // }
+
+// extension KTableCalendarStyle on TableCalendar {
+//   static const CalendarStyle none = CalendarStyle();
+// }
+//
+// extension KTableCalendarDaysOfWeekStyle on DaysOfWeekStyle {
+//   static const DaysOfWeekStyle weekDayBlack_weekendBlack45 = DaysOfWeekStyle(
+//     weekdayStyle: KTextStyle.black,
+//     weekendStyle: KTextStyle.black45,
+//   );
+// }
+
